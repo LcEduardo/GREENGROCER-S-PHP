@@ -21,3 +21,6 @@ composer.phar
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Agents de IA
+CLAUDE.md
