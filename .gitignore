@@ -1,0 +1,23 @@
+# Dependências
+/vendor/
+
+# Composer
+composer.phar
+
+# PHPUnit
+/.phpunit.cache/
+.phpunit.result.cache
+
+# Ambiente
+.env
+.env.local
+
+# IDE / Editor
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+{
+    "name": "user/greengrocers",
+    "autoload": {
+        "psr-4": {
+            "User\\Greengrocers\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "User\\Greengrocers\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "LcEduardo",
+            "email": "lucasproject777@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.2"
+    }
+}
