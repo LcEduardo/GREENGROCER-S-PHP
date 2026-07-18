@@ -12,6 +12,9 @@ composer.phar
 .env
 .env.local
 
+# Banco local (SQLite)
+/database/*.sqlite
+
 # IDE / Editor
 /.idea/
 /.vscode/
