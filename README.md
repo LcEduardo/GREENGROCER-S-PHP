@@ -23,6 +23,72 @@ composer install --no-dev
 
 ---
 
+## Banco de Dados
+
+### Configuração da conexão
+
+Copie o `.env.example` para `.env` e ajuste. O `.env` **não vai para o Git** — é onde moram os valores reais.
+
+```bash
+cp .env.example .env
+```
+
+O projeto suporta **SQLite** (padrão) e **Postgres**. Trocar de banco é trocar uma linha:
+
+```dotenv
+DB_DRIVER=sqlite   # ou pgsql
+```
+
+Com `sqlite`, o banco é um arquivo em `database/greengrocers.sqlite`, criado sozinho no primeiro uso — não precisa instalar nem subir serviço nenhum. Com `pgsql`, valem as variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`.
+
+O mapeamento das variáveis mora em `config/database.php`, e a `src/Database/Connection.php` é o **único** ponto do projeto que sabe qual banco está rodando. Todo o resto recebe um PDO pronto e não faz ideia do driver — por isso trocar de banco não exige mexer em mais nenhum arquivo.
+
+### Migrations
+
+O schema do banco não é criado na mão: ele é versionado em **migrations**, usando o `doctrine/migrations` (standalone, sem o ORM do Doctrine).
+
+A ideia é que o banco seja reproduzível. Em vez de alguém rodar um `.sql` solto e o banco de cada dev acabar diferente, cada mudança de schema vira um arquivo versionado no Git. Quem clona o projeto roda um comando e chega exatamente no mesmo estado.
+
+**Criar uma migration:**
+
+```bash
+php vendor/bin/doctrine-migrations generate
+```
+
+Isso gera uma classe em `database/migrations/` com dois métodos: `up()` (aplica a mudança) e `down()` (desfaz).
+
+**Aplicar as migrations pendentes:**
+
+```bash
+php vendor/bin/doctrine-migrations migrate
+```
+
+**Ver o que já rodou e o que está pendente:**
+
+```bash
+php vendor/bin/doctrine-migrations status
+```
+
+O Doctrine guarda o histórico numa tabela `doctrine_migration_versions` dentro do próprio banco, então ele sabe quais migrations já foram aplicadas e nunca roda a mesma duas vezes.
+
+**Arquivos de configuração** (na raiz):
+
+| Arquivo | Papel |
+|---|---|
+| `migrations.php` | Onde ficam as migrations e onde o histórico é gravado |
+| `migrations-db.php` | Traduz o `config/database.php` para o formato do DBAL |
+
+O `migrations-db.php` lê a **mesma** configuração que a aplicação e segue o `DB_DRIVER`. Isso é proposital: sem isso, as migrations poderiam rodar num banco diferente do que a app usa — um erro chato de diagnosticar.
+
+> ⚠️ **Escreva migrations que funcionem nos dois bancos.** Como o projeto roda SQLite e Postgres, evite SQL cru específico de um deles (`SERIAL`, `JSONB` e `UUID` não existem no SQLite; o `ALTER TABLE` do SQLite é bem limitado). Prefira o *Schema Builder* do DBAL (`$schema->createTable(...)`), que gera o SQL certo para cada driver.
+
+> ⚠️ **Herd:** rode sempre com o PHP do Herd, que é o runtime real do projeto e tem o driver `pdo_pgsql` habilitado. Se o `php` do seu PATH for outra instalação, chame pelo caminho completo:
+> ```powershell
+> & "C:\Users\SEU_USUARIO\.config\herd\bin\php.bat" vendor\bin\doctrine-migrations status
+> ```
+
+---
+
 ## Testes
 
 Os testes usam **PHPUnit** (incluído nas dependências de DEV). Para rodá-los, instale o ambiente completo com `composer install` (sem o `--no-dev`).
