@@ -149,7 +149,7 @@ Colocando só o index.php dentro de public/ e apontando o servidor para lá, o n
 Outro ponto: o index.php é o único arquivo que o navegador acessa. Ele é nosso Front Controller. Ele vai receber todas as requisições e decidir qual Controller deve ser chamado, de acordo com a rota (o switch do roteamento). Vantagens:
 
 - Um lugar central para carregar o autoload, iniciar sessão, tratar erros, etc.
-- URLs limpas (/users em vez de /users.php).
+- URLs limpas (/produtos em vez de /produtos.php).
 - Controle total do fluxo.
 
 > Para quem usar o HERD. Por padrão, o Herd já aponta o document root para public/. Então você só precisa acessar http://greengrocers.test/ e tudo vai funcionar.

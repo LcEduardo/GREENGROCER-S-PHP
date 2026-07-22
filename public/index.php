@@ -4,25 +4,16 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use User\Greengrocers\Controller\UsersController;
-
+use User\Greengrocers\Controller\ProductsController;
+use User\Greengrocers\Repository\ProductRepository;
+use User\Greengrocers\Database\Connection;
 // Roteamento simples baseado no caminho da URL
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-$controller = new UsersController();
-
 switch ($path) {
     case '/':
-        // Entrada do site: manda direto para o formulário de cadastro
-        header('Location: /users/add');
-        break;
-
-    case '/users':
-        $controller->index();
-        break;
-
-    case '/users/add':
-        $controller->add();
+        $repository = new ProductRepository(Connection::get());
+        (new ProductsController($repository))->index();
         break;
 
     default:
