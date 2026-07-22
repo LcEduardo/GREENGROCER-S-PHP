@@ -104,17 +104,33 @@ php vendor/bin/phpunit
 O arquivo `phpunit.xml` já configura tudo (bootstrap do autoload e a pasta `tests/`), então não é preciso passar argumentos. Saída esperada:
 
 ```
-OK (3 tests, 4 assertions)
+OK (1 test, 2 assertions)
 ```
+
+### Banco de testes
+
+Testes que tocam o banco estendem `tests/Support/DatabaseTestCase.php`, que entrega
+um `$this->pdo` pronto. Cada teste recebe um **SQLite `:memory:` novo**, criado no
+`setUp()` e destruído no fim — seu banco de desenvolvimento nunca é tocado, e nenhum
+teste consegue sujar o próximo.
+
+O schema não é escrito à mão lá: o próprio `doctrine/migrations` roda contra esse
+banco em memória. Assim o teste sempre exercita o schema de verdade, e não uma cópia
+que envelhece calada a cada migration nova.
+
+> ⚠️ O `:memory:` existe **dentro de uma conexão**. Um segundo PDO apontando para
+> `:memory:` abre outro banco, vazio — e o teste falha com zero linhas em vez de dar
+> erro. Por isso o repositório precisa receber o mesmo PDO que o `DatabaseTestCase`
+> montou, e não um vindo da `Connection`.
 
 Outros comandos úteis:
 
 ```bash
 # Rodar um arquivo de teste específico
-php vendor/bin/phpunit tests/Model/UserTest.php
+php vendor/bin/phpunit tests/Repository/ProductRepositoryTest.php
 
 # Rodar apenas um método, filtrando pelo nome
-php vendor/bin/phpunit --filter test_a_senha_original_confere_contra_o_hash
+php vendor/bin/phpunit --filter test_findActive_nao_traz_produto_inativo
 ```
 
 ---
