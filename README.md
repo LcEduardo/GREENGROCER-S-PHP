@@ -41,7 +41,7 @@ DB_DRIVER=sqlite   # ou pgsql
 
 Com `sqlite`, o banco é um arquivo em `database/greengrocers.sqlite`, criado sozinho no primeiro uso — não precisa instalar nem subir serviço nenhum. Com `pgsql`, valem as variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`.
 
-O mapeamento das variáveis mora em `config/database.php`, e a `src/Database/Connection.php` é o **único** ponto do projeto que sabe qual banco está rodando. Todo o resto recebe um PDO pronto e não faz ideia do driver — por isso trocar de banco não exige mexer em mais nenhum arquivo.
+O mapeamento das variáveis mora em `config/database.php`, e a `src/Database/Connection.php` é o **único** ponto do projeto que sabe qual banco está rodando. Todo o resto recebe um PDO pronto — na prática, um Repository (ver [Arquitetura](#arquitetura)) — e não faz ideia do driver. Por isso trocar de banco não exige mexer em mais nenhum arquivo.
 
 ### Migrations
 
@@ -125,7 +125,7 @@ Utilizamos o padrão MVC para organizar o projeto. As rotas são definidas no ar
 Imagine que o document root fosse a raiz do projeto. Aí qualquer pessoa poderia digitar na URL:
 
 - http://greengrocers.test/composer.json → veria suas dependências
-- http://greengrocers.test/src/Model/User.php → veria seu código-fonte
+- http://greengrocers.test/src/Database/Connection.php → veria seu código-fonte
 - http://greengrocers.test/.env → veria senhas de banco (no futuro)
 
 Colocando só o index.php dentro de public/ e apontando o servidor para lá, o navegador não consegue subir para ../src, ../vendor, ../.env. Tudo que é sensível fica fora do alcance. Isso é uma boa prática de qualquer app PHP sério (Laravel, Symfony, todos fazem assim)
@@ -137,3 +137,37 @@ Outro ponto: o index.php é o único arquivo que o navegador acessa. Ele é noss
 - Controle total do fluxo.
 
 > Para quem usar o HERD. Por padrão, o Herd já aponta o document root para public/. Então você só precisa acessar http://greengrocers.test/ e tudo vai funcionar.
+
+---
+
+## Arquitetura
+
+```
+HTTP → Controller → Repository → PDO → banco
+          │             │
+          │         devolve Model[]
+          ↓
+        View → HTML
+```
+
+A dependência anda numa direção só: o Controller conhece o Repository, o Repository conhece o Model. O Model não conhece nenhum dos dois, e o Repository não sabe o que é uma requisição HTTP.
+
+### Controller
+
+Controller não sabe se o banco existe, seu papel é o HTTP. Ler a requisição (`$_GET`, `$_POST`), decidir o que precisa ser feito e pedir para quem sabe fazer, e escolher o template + status code.
+
+Se amanhã os produtos viessem de uma API externa em vez do banco, o Controller ficaria idêntico — quem mudaria era o Repository.
+
+### Repository
+
+É quem gera o SQL e monta o Model a partir do resultado.
+
+- é o **único** lugar do projeto com SQL — é isso que dá a ele um endereço fixo
+- **recebe** o PDO pronto, não chama a `Connection` por dentro — é o que torna ele testável com um SQLite `:memory:`
+- devolve `Model[]`, não o array cru do PDO — a conversão é trabalho dele
+- é onde mora a portabilidade dos dois drivers (ex.: `WHERE active = TRUE`, que funciona nos dois; `active = 1` o Postgres recusa)
+
+### Model
+
+Conhece os dados **e as regras que andam junto com eles**. Não é um saco de campos: se um objeto existe, ele está num estado válido — a validação mora no construtor, não em quem chama. 
+
