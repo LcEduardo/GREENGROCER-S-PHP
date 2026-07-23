@@ -187,3 +187,7 @@ Se amanhã os produtos viessem de uma API externa em vez do banco, o Controller 
 
 Conhece os dados **e as regras que andam junto com eles**. Não é um saco de campos: se um objeto existe, ele está num estado válido — a validação mora no construtor, não em quem chama. 
 
+---
+
+## Trade-offs
+Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é usada apenas para filtrar produtos. Não se segue uma outra regra de negócio, então não há necessidade de criar uma classe para ela. Caso no futuro seja necessário, e se tiver regras de negócio, que serão chamadas em algum ponto do projeto, então será necessário criar uma classe para ela.

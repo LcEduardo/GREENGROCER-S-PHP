@@ -41,15 +41,31 @@ class ProductRepository
         );
     }
 
-    /** @return Product[] */
-    public function findActive(): array
+    /**
+     * A vitrine. Sem categoria, todos os ativos; com categoria, só os daquela —
+     * e o recorte por `active` continua valendo junto, nunca no lugar dele.
+     *
+     * @return Product[]
+     */
+    public function findActive(?int $categoryId = null): array
     {
-        $statement = $this->pdo->query(<<<SQL
-            SELECT id, name, category_id, unit, sale_price, stock_quantity, image
-            FROM products
-            WHERE active = TRUE
-            ORDER BY name
-        SQL);
+        // Cláusula e parâmetro nascem no MESMO if: some a repetição de checar
+        // null duas vezes, e sem categoria o execute só recebe um array vazio.
+        $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, image'
+             . ' FROM products'
+             . ' WHERE active = TRUE';
+
+        $params = [];
+
+        if ($categoryId !== null) {
+            $sql .= ' AND category_id = :categoryId';
+            $params['categoryId'] = $categoryId;
+        }
+
+        $sql .= ' ORDER BY name';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($params);
 
         $produtos = [];
 

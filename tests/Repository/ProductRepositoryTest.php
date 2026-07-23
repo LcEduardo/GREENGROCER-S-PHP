@@ -22,6 +22,28 @@ class ProductRepositoryTest extends DatabaseTestCase
     }
 
     /**
+     * O filtro da vitrine: findActive(categoryId) traz só os produtos ativos
+     * daquela categoria. É o que sustenta o "Todos | Frutas | Legumes" na tela.
+     *
+     * O inativo entra de propósito: garante que o filtro por categoria não
+     * afrouxa o filtro por `active` — os dois recortes valem juntos.
+     */
+    public function test_findActive_filtra_por_categoria(): void
+    {
+        $this->criarCategoria(1, 'Legumes');
+        $this->criarCategoria(2, 'Frutas');
+
+        $this->criarProduto(nome: 'Tomate', ativo: true,  categoriaId: 1);
+        $this->criarProduto(nome: 'Maçã',   ativo: true,  categoriaId: 2);
+        $this->criarProduto(nome: 'Banana', ativo: false, categoriaId: 2);
+
+        $frutas = new ProductRepository($this->pdo)->findActive(categoryId: 2);
+
+        $this->assertCount(1, $frutas);
+        $this->assertSame('Maçã', $frutas[0]->name);
+    }
+
+    /**
      * A categoria vem SEMPRE antes do produto: products.category_id tem FK
      * RESTRICT para categories, e o DatabaseTestCase liga o PRAGMA que faz o
      * SQLite cobrar isso de verdade.

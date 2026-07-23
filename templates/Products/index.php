@@ -1,5 +1,12 @@
 <h1><?= htmlspecialchars($title) ?></h1>
 
+<nav aria-label="Filtrar por categoria">
+    <a href="/"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>
+    <?php foreach ($categorias as $id => $nome): ?>
+        <a href="/?category=<?= $id ?>"<?= $categoriaSelecionada === $id ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($nome) ?></a>
+    <?php endforeach; ?>
+</nav>
+
 <?php if (empty($produtos)): ?>
     <p>Nenhum produto disponível no momento.</p>
 <?php else: ?>
