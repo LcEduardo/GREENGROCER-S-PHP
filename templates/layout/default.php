@@ -6,6 +6,7 @@
     <title><?= htmlspecialchars($title ?? 'Greengrocers') ?></title>
 </head>
 <body>
+    <nav><a href="/"><h2>Greengrocers.</h2></a><a href="/admin/products">Products</a></nav>
     <?= $content ?>
 </body>
 </html>

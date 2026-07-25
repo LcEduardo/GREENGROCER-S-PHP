@@ -15,6 +15,11 @@ switch ($path) {
         $repository = new ProductRepository(Connection::get());
         (new ProductsController($repository))->index();
         break;
+    
+    case '/admin/products':
+        $repo = new ProductRepository(Connection::get());
+        (new ProductsController($repo))->admin();
+        break;
 
     default:
         http_response_code(404);

@@ -47,4 +47,12 @@ class ProductsController
             'categoriaSelecionada' => $categoryId,
         ]);
     }
+    
+    public function admin(): void 
+    {
+        $this->view->render('Products/admin', [
+            'title'                => 'Produtos',
+            'produtos'             => $this->products->findAllProducts(),
+        ]);
+    }
 }

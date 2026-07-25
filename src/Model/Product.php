@@ -19,16 +19,15 @@ class Product
         public readonly int $id,
         public readonly string $name,
         public readonly int $categoryId,
-
-        // Unidade de medida: 'kg', 'un', 'mc' (maço)...
         public readonly string $unit,
-
         // DINHEIRO e QUANTIDADE vêm como STRING, não float — a mesma decisão que
         // a migration documenta. O PDO já os entrega assim (DECIMAL), e converter
         // para float aqui jogaria fora a precisão que o schema foi feito para
         // proteger. Quem formata para exibição é a View.
         public readonly string $salePrice,
         public readonly string $stockQuantity,
+
+        public readonly bool $active,
 
         public readonly ?string $image = null,
     ) {

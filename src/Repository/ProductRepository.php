@@ -37,6 +37,10 @@ class ProductRepository
             // jogou fora não volta.
             salePrice:     (string) $row['sale_price'],
             stockQuantity: (string) $row['stock_quantity'],
+            // BOOLEAN também diverge por driver: o Postgres devolve a string 't'/'f',
+            // o SQLite devolve int 0/1. Um (bool) direto quebraria o Postgres — (bool) 'f'
+            // é true, porque é string não vazia. O in_array cobre os dois formatos.
+            active: in_array($row['active'], [true, 1, '1', 't'], true),
             image: $row['image'],
         );
     }
@@ -51,7 +55,7 @@ class ProductRepository
     {
         // Cláusula e parâmetro nascem no MESMO if: some a repetição de checar
         // null duas vezes, e sem categoria o execute só recebe um array vazio.
-        $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, image'
+        $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, active, image'
              . ' FROM products'
              . ' WHERE active = TRUE';
 
@@ -68,6 +72,22 @@ class ProductRepository
         $statement->execute($params);
 
         $produtos = [];
+
+        foreach ($statement as $row) {
+            $produtos[] = $this->hydrate($row);
+        }
+
+        return $produtos;
+    }
+
+    public function findAllProducts(): array
+    {
+        $sql = $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, active,image'
+                    . ' FROM products'
+                    . ' order by active desc';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute();
 
         foreach ($statement as $row) {
             $produtos[] = $this->hydrate($row);
