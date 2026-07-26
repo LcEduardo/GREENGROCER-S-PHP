@@ -4,25 +4,43 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use User\Greengrocers\Controller\UsersController;
-
+use User\Greengrocers\Controller\ProductsController;
+use User\Greengrocers\Repository\ProductRepository;
+use User\Greengrocers\Database\Connection;
 // Roteamento simples baseado no caminho da URL
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
-$controller = new UsersController();
-
 switch ($path) {
     case '/':
-        // Entrada do site: manda direto para o formulário de cadastro
-        header('Location: /users/add');
+        $repository = new ProductRepository(Connection::get());
+        (new ProductsController($repository))->index();
+        break;
+    
+    case '/admin/products':
+        $repo = new ProductRepository(Connection::get());
+        (new ProductsController($repo))->admin();
         break;
 
-    case '/users':
-        $controller->index();
+    case '/admin/products/edit':
+        $repo = new ProductRepository(Connection::get());
+        $controller = new ProductsController($repo);
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $controller->update();
+        } else {
+            $controller->edit();
+        }
         break;
 
-    case '/users/add':
-        $controller->add();
+    case '/admin/products/create':
+        $repo = new ProductRepository(Connection::get());
+        $controller = new ProductsController($repo);
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $controller->store();
+        } else {
+            $controller->create();
+        }
         break;
 
     default:

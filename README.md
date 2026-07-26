@@ -41,7 +41,7 @@ DB_DRIVER=sqlite   # ou pgsql
 
 Com `sqlite`, o banco é um arquivo em `database/greengrocers.sqlite`, criado sozinho no primeiro uso — não precisa instalar nem subir serviço nenhum. Com `pgsql`, valem as variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASSWORD`.
 
-O mapeamento das variáveis mora em `config/database.php`, e a `src/Database/Connection.php` é o **único** ponto do projeto que sabe qual banco está rodando. Todo o resto recebe um PDO pronto e não faz ideia do driver — por isso trocar de banco não exige mexer em mais nenhum arquivo.
+O mapeamento das variáveis mora em `config/database.php`, e a `src/Database/Connection.php` é o **único** ponto do projeto que sabe qual banco está rodando. Todo o resto recebe um PDO pronto — na prática, um Repository (ver [Arquitetura](#arquitetura)) — e não faz ideia do driver. Por isso trocar de banco não exige mexer em mais nenhum arquivo.
 
 ### Migrations
 
@@ -104,17 +104,33 @@ php vendor/bin/phpunit
 O arquivo `phpunit.xml` já configura tudo (bootstrap do autoload e a pasta `tests/`), então não é preciso passar argumentos. Saída esperada:
 
 ```
-OK (3 tests, 4 assertions)
+OK (1 test, 2 assertions)
 ```
+
+### Banco de testes
+
+Testes que tocam o banco estendem `tests/Support/DatabaseTestCase.php`, que entrega
+um `$this->pdo` pronto. Cada teste recebe um **SQLite `:memory:` novo**, criado no
+`setUp()` e destruído no fim — seu banco de desenvolvimento nunca é tocado, e nenhum
+teste consegue sujar o próximo.
+
+O schema não é escrito à mão lá: o próprio `doctrine/migrations` roda contra esse
+banco em memória. Assim o teste sempre exercita o schema de verdade, e não uma cópia
+que envelhece calada a cada migration nova.
+
+> ⚠️ O `:memory:` existe **dentro de uma conexão**. Um segundo PDO apontando para
+> `:memory:` abre outro banco, vazio — e o teste falha com zero linhas em vez de dar
+> erro. Por isso o repositório precisa receber o mesmo PDO que o `DatabaseTestCase`
+> montou, e não um vindo da `Connection`.
 
 Outros comandos úteis:
 
 ```bash
 # Rodar um arquivo de teste específico
-php vendor/bin/phpunit tests/Model/UserTest.php
+php vendor/bin/phpunit tests/Repository/ProductRepositoryTest.php
 
 # Rodar apenas um método, filtrando pelo nome
-php vendor/bin/phpunit --filter test_a_senha_original_confere_contra_o_hash
+php vendor/bin/phpunit --filter test_findActive_nao_traz_produto_inativo
 ```
 
 ---
@@ -125,7 +141,7 @@ Utilizamos o padrão MVC para organizar o projeto. As rotas são definidas no ar
 Imagine que o document root fosse a raiz do projeto. Aí qualquer pessoa poderia digitar na URL:
 
 - http://greengrocers.test/composer.json → veria suas dependências
-- http://greengrocers.test/src/Model/User.php → veria seu código-fonte
+- http://greengrocers.test/src/Database/Connection.php → veria seu código-fonte
 - http://greengrocers.test/.env → veria senhas de banco (no futuro)
 
 Colocando só o index.php dentro de public/ e apontando o servidor para lá, o navegador não consegue subir para ../src, ../vendor, ../.env. Tudo que é sensível fica fora do alcance. Isso é uma boa prática de qualquer app PHP sério (Laravel, Symfony, todos fazem assim)
@@ -133,7 +149,48 @@ Colocando só o index.php dentro de public/ e apontando o servidor para lá, o n
 Outro ponto: o index.php é o único arquivo que o navegador acessa. Ele é nosso Front Controller. Ele vai receber todas as requisições e decidir qual Controller deve ser chamado, de acordo com a rota (o switch do roteamento). Vantagens:
 
 - Um lugar central para carregar o autoload, iniciar sessão, tratar erros, etc.
-- URLs limpas (/users em vez de /users.php).
+- URLs limpas (/produtos em vez de /produtos.php).
 - Controle total do fluxo.
 
 > Para quem usar o HERD. Por padrão, o Herd já aponta o document root para public/. Então você só precisa acessar http://greengrocers.test/ e tudo vai funcionar.
+
+---
+
+## Arquitetura
+
+```
+HTTP → Controller → Repository → PDO → banco
+          │             │
+          │         devolve Model[]
+          ↓
+        View → HTML
+```
+
+A dependência anda numa direção só: o Controller conhece o Repository, o Repository conhece o Model. O Model não conhece nenhum dos dois, e o Repository não sabe o que é uma requisição HTTP.
+
+### Controller
+
+Controller não sabe se o banco existe, seu papel é o HTTP. Ler a requisição (`$_GET`, `$_POST`), decidir o que precisa ser feito e pedir para quem sabe fazer, e escolher o template + status code.
+
+Se amanhã os produtos viessem de uma API externa em vez do banco, o Controller ficaria idêntico — quem mudaria era o Repository.
+
+### Repository
+
+É quem gera o SQL e monta o Model a partir do resultado.
+
+- é o **único** lugar do projeto com SQL — é isso que dá a ele um endereço fixo
+- **recebe** o PDO pronto, não chama a `Connection` por dentro — é o que torna ele testável com um SQLite `:memory:`
+- devolve `Model[]`, não o array cru do PDO — a conversão é trabalho dele
+- é onde mora a portabilidade dos dois drivers (ex.: `WHERE active = TRUE`, que funciona nos dois; `active = 1` o Postgres recusa)
+
+### Model
+
+Conhece os dados **e as regras que andam junto com eles**. Não é um saco de campos: se um objeto existe, ele está num estado válido — a validação mora no construtor, não em quem chama. 
+
+---
+
+## Trade-offs
+Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é usada apenas para filtrar produtos. Não se segue uma outra regra de negócio, então não há necessidade de criar uma classe para ela. Caso no futuro seja necessário, e se tiver regras de negócio, que serão chamadas em algum ponto do projeto, então será necessário criar uma classe para ela.
+
+### Admin/Products
+Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuário administrador pode querer ver os produtos inativos para reativá-los. Caso o usuário admin queira alterar o status de um produto, ele acessa a tela de edição do produto e altera o status. Nessa tela, ele conseguirá visualizar a movimentação do produto, para poder tomar uma decisão.
