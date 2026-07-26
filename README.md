@@ -202,3 +202,6 @@ Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é u
 
 ### Admin/Products
 Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuário administrador pode querer ver os produtos inativos para reativá-los. Caso o usuário admin queira alterar o status de um produto, ele acessa a tela de edição do produto e altera o status. Nessa tela, ele conseguirá visualizar a movimentação do produto, para poder tomar uma decisão.
+
+### Users
+Optei por criar usuários administradores na mão. A tela de cadastro do usuário é por padrão para *clientes*. Inicialmente, só precisa de senha, nome e email. Caso ele vá fazer uma compra ai será solicitado o endereço e o telefone.  
