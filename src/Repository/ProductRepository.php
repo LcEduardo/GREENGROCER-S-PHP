@@ -102,6 +102,40 @@ class ProductRepository
     }
 
     /**
+     * Mesmos campos de update(), mais created_at: a coluna não tem DEFAULT na
+     * migration, então precisa vir de algum lugar na criação.
+     *
+     * @return int O id gerado, para quem cria já poder buscar o produto de volta.
+     */
+    public function create(
+        string $name,
+        int $categoryId,
+        string $unit,
+        string $salePrice,
+        string $stockQuantity,
+        bool $active,
+        ?string $image,
+    ): int {
+        $sql = 'INSERT INTO products'
+             . ' (name, category_id, unit, sale_price, stock_quantity, active, image, created_at)'
+             . ' VALUES (:name, :categoryId, :unit, :salePrice, :stockQuantity, :active, :image, :createdAt)';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute([
+            'name'          => $name,
+            'categoryId'    => $categoryId,
+            'unit'          => $unit,
+            'salePrice'     => $salePrice,
+            'stockQuantity' => $stockQuantity,
+            'active'        => $active ? '1' : '0',
+            'image'         => $image,
+            'createdAt'     => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Campos editáveis pela tela de admin. `cost_price`, `ean` e `created_at`
      * ficam de fora de propósito: não fazem parte do formulário de edição.
      */

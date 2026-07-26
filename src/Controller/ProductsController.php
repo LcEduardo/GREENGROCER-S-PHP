@@ -98,4 +98,28 @@ class ProductsController
 
         header('Location: /admin/products');
     }
+
+    public function create(): void
+    {
+        $this->view->render('Products/create', [
+            'title'      => 'Novo produto',
+            'categorias' => self::CATEGORIAS,
+        ]);
+    }
+
+    public function store(): void
+    {
+        $this->products->create(
+            name: (string) filter_input(INPUT_POST, 'name'),
+            categoryId: (int) filter_input(INPUT_POST, 'categoryId', FILTER_VALIDATE_INT),
+            unit: (string) filter_input(INPUT_POST, 'unit'),
+            salePrice: (string) filter_input(INPUT_POST, 'salePrice'),
+            stockQuantity: (string) filter_input(INPUT_POST, 'stockQuantity'),
+            // Checkbox desmarcado nem entra no POST — a presença da chave é o sinal.
+            active: filter_input(INPUT_POST, 'active') !== null,
+            image: filter_input(INPUT_POST, 'image') ?: null,
+        );
+
+        header('Location: /admin/products');
+    }
 }

@@ -1,3 +1,5 @@
+<a href="/admin/products/create">Novo produto</a>
+
 <?php if (empty($produtos)): ?>
     <p>Nenhum produto disponível no momento.</p>
 <?php else: ?>

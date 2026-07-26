@@ -100,6 +100,38 @@ class ProductRepositoryTest extends DatabaseTestCase
         $this->assertSame('tomate.jpg', $produto->image);
     }
 
+    public function test_create_insere_o_produto_e_devolve_o_id_gerado(): void
+    {
+        $this->criarCategoria(1, 'Legumes');
+
+        $repository = new ProductRepository($this->pdo);
+
+        $id = $repository->create(
+            name: 'Cenoura',
+            categoryId: 1,
+            unit: 'kg',
+            salePrice: '4.50',
+            stockQuantity: '10.000',
+            active: true,
+            image: 'cenoura.jpg',
+        );
+
+        $produto = $repository->findById($id);
+
+        $this->assertNotNull($produto);
+        $this->assertSame('Cenoura', $produto->name);
+        $this->assertSame(1, $produto->categoryId);
+        $this->assertSame('kg', $produto->unit);
+
+        // Comparado como float pelo mesmo motivo do teste de update: o SQLite
+        // não tem DECIMAL de verdade e guarda NUMERIC como REAL.
+        $this->assertSame(4.5, (float) $produto->salePrice);
+        $this->assertSame(10.0, (float) $produto->stockQuantity);
+
+        $this->assertTrue($produto->active);
+        $this->assertSame('cenoura.jpg', $produto->image);
+    }
+
     /**
      * A categoria vem SEMPRE antes do produto: products.category_id tem FK
      * RESTRICT para categories, e o DatabaseTestCase liga o PRAGMA que faz o

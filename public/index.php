@@ -32,6 +32,17 @@ switch ($path) {
         }
         break;
 
+    case '/admin/products/create':
+        $repo = new ProductRepository(Connection::get());
+        $controller = new ProductsController($repo);
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $controller->store();
+        } else {
+            $controller->create();
+        }
+        break;
+
     default:
         http_response_code(404);
         echo 'Página não encontrada';
