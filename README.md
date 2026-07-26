@@ -1,3 +1,11 @@
+## Goals
+- [ ] Implementar o padrão TDD (Test Driven Development) no projeto.
+- [ ] Implementar o padrão MVC (Model-View-Controller) no projeto.
+- [ ] Implementar o padrão Repository no projeto.
+- [ ] Implementar migrations para versionamento do banco de dados.
+- [ ] Aprender authentication e autorização de usuários.
+- [ ] Aprender sessões e cookies.
+
 ## Requisitos
 
 **Ambiente:**
