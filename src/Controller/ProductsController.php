@@ -48,11 +48,54 @@ class ProductsController
         ]);
     }
     
-    public function admin(): void 
+    public function admin(): void
     {
         $this->view->render('Products/admin', [
             'title'                => 'Produtos',
             'produtos'             => $this->products->findAllProducts(),
         ]);
+    }
+
+    public function edit(): void
+    {
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
+        $produto = $id !== null ? $this->products->findById($id) : null;
+
+        if ($produto === null) {
+            http_response_code(404);
+            echo 'Produto não encontrado';
+            return;
+        }
+
+        $this->view->render('Products/edit', [
+            'title'      => 'Editar produto',
+            'produto'    => $produto,
+            'categorias' => self::CATEGORIAS,
+        ]);
+    }
+
+    public function update(): void
+    {
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
+
+        if ($id === null) {
+            http_response_code(404);
+            echo 'Produto não encontrado';
+            return;
+        }
+
+        $this->products->update(
+            id: $id,
+            name: (string) filter_input(INPUT_POST, 'name'),
+            categoryId: (int) filter_input(INPUT_POST, 'categoryId', FILTER_VALIDATE_INT),
+            unit: (string) filter_input(INPUT_POST, 'unit'),
+            salePrice: (string) filter_input(INPUT_POST, 'salePrice'),
+            stockQuantity: (string) filter_input(INPUT_POST, 'stockQuantity'),
+            // Checkbox desmarcado nem entra no POST — a presença da chave é o sinal.
+            active: filter_input(INPUT_POST, 'active') !== null,
+            image: filter_input(INPUT_POST, 'image') ?: null,
+        );
+
+        header('Location: /admin/products');
     }
 }

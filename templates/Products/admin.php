@@ -9,6 +9,7 @@
                 <th>Preço</th>
                 <th>Estoque</th>
                 <th>Ativo</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +20,7 @@
                     <td><?= $produto->formattedPrice() ?></td>
                     <td><?= $produto->formattedStock() ?></td>
                     <td><?= $produto->active ? 'Sim' : 'Não' ?></td>
+                    <td><a href="/admin/products/edit?id=<?= $produto->id ?>">Editar</a></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

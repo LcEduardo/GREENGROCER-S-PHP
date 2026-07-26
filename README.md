@@ -191,3 +191,6 @@ Conhece os dados **e as regras que andam junto com eles**. Não é um saco de ca
 
 ## Trade-offs
 Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é usada apenas para filtrar produtos. Não se segue uma outra regra de negócio, então não há necessidade de criar uma classe para ela. Caso no futuro seja necessário, e se tiver regras de negócio, que serão chamadas em algum ponto do projeto, então será necessário criar uma classe para ela.
+
+### Admin/Products
+Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuário administrador pode querer ver os produtos inativos para reativá-los. Caso o usuário admin queira alterar o status de um produto, ele acessa a tela de edição do produto e altera o status. Nessa tela, ele conseguirá visualizar a movimentação do produto, para poder tomar uma decisão.

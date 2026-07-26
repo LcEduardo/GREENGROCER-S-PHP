@@ -29,17 +29,8 @@ class ProductRepository
             categoryId: (int) $row['category_id'],
             name: $row['name'],
             unit: $row['unit'],
-            // DECIMAL segue como string até a View, mas o cast é obrigatório
-            // porque os drivers divergem: o Postgres devolve a string "7.90", o
-            // SQLite devolve float(7.9). O SQLite não tem DECIMAL de verdade —
-            // por afinidade de tipo ele guarda NUMERIC como REAL, e a escala se
-            // perde na ESCRITA. Aqui só uniformizamos o tipo; o que o banco
-            // jogou fora não volta.
             salePrice:     (string) $row['sale_price'],
             stockQuantity: (string) $row['stock_quantity'],
-            // BOOLEAN também diverge por driver: o Postgres devolve a string 't'/'f',
-            // o SQLite devolve int 0/1. Um (bool) direto quebraria o Postgres — (bool) 'f'
-            // é true, porque é string não vazia. O in_array cobre os dois formatos.
             active: in_array($row['active'], [true, 1, '1', 't'], true),
             image: $row['image'],
         );
@@ -94,5 +85,52 @@ class ProductRepository
         }
 
         return $produtos;
+    }
+
+    public function findById(int $id): ?Product
+    {
+        $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, active, image'
+             . ' FROM products'
+             . ' WHERE id = :id';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['id' => $id]);
+
+        $row = $statement->fetch();
+
+        return $row === false ? null : $this->hydrate($row);
+    }
+
+    /**
+     * Campos editáveis pela tela de admin. `cost_price`, `ean` e `created_at`
+     * ficam de fora de propósito: não fazem parte do formulário de edição.
+     */
+    public function update(
+        int $id,
+        string $name,
+        int $categoryId,
+        string $unit,
+        string $salePrice,
+        string $stockQuantity,
+        bool $active,
+        ?string $image,
+    ): void {
+        $sql = 'UPDATE products'
+             . ' SET name = :name, category_id = :categoryId, unit = :unit,'
+             . ' sale_price = :salePrice, stock_quantity = :stockQuantity,'
+             . ' active = :active, image = :image'
+             . ' WHERE id = :id';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute([
+            'name'          => $name,
+            'categoryId'    => $categoryId,
+            'unit'          => $unit,
+            'salePrice'     => $salePrice,
+            'stockQuantity' => $stockQuantity,
+            'active'        => $active ? '1' : '0',
+            'image'         => $image,
+            'id'            => $id,
+        ]);
     }
 }

@@ -43,6 +43,63 @@ class ProductRepositoryTest extends DatabaseTestCase
         $this->assertSame('Maçã', $frutas[0]->name);
     }
 
+    public function test_findById_traz_o_produto_pelo_id(): void
+    {
+        $this->criarCategoria(1, 'Legumes');
+        $this->criarProduto(nome: 'Cenoura', ativo: true);
+        $id = $this->criarProduto(nome: 'Tomate', ativo: true);
+
+        $produto = new ProductRepository($this->pdo)->findById($id);
+
+        $this->assertNotNull($produto);
+        $this->assertSame('Tomate', $produto->name);
+    }
+
+    public function test_findById_retorna_null_quando_o_id_nao_existe(): void
+    {
+        $produto = new ProductRepository($this->pdo)->findById(999);
+
+        $this->assertNull($produto);
+    }
+
+    /**
+     * A tela de admin edita o produto inteiro, inclusive o `active` — é o que
+     * substitui um botão dedicado de ativar/desativar.
+     */
+    public function test_update_altera_os_campos_editaveis(): void
+    {
+        $this->criarCategoria(1, 'Legumes');
+        $this->criarCategoria(2, 'Frutas');
+        $id = $this->criarProduto(nome: 'Tomate', ativo: true, categoriaId: 1);
+
+        $repository = new ProductRepository($this->pdo);
+
+        $repository->update(
+            id: $id,
+            name: 'Tomate Italiano',
+            categoryId: 2,
+            unit: 'un',
+            salePrice: '9.50',
+            stockQuantity: '3.000',
+            active: false,
+            image: 'tomate.jpg',
+        );
+
+        $produto = $repository->findById($id);
+
+        $this->assertSame('Tomate Italiano', $produto->name);
+        $this->assertSame(2, $produto->categoryId);
+        $this->assertSame('un', $produto->unit);
+
+        // Comparado como float, não como string: o SQLite não tem DECIMAL de
+        // verdade e guarda NUMERIC como REAL — "9.50" volta como "9.5".
+        $this->assertSame(9.5, (float) $produto->salePrice);
+        $this->assertSame(3.0, (float) $produto->stockQuantity);
+
+        $this->assertFalse($produto->active);
+        $this->assertSame('tomate.jpg', $produto->image);
+    }
+
     /**
      * A categoria vem SEMPRE antes do produto: products.category_id tem FK
      * RESTRICT para categories, e o DatabaseTestCase liga o PRAGMA que faz o
@@ -62,8 +119,11 @@ class ProductRepositoryTest extends DatabaseTestCase
      *
      * O `active` também tem default, mas entra explícito de propósito — é a
      * única coluna que este teste discrimina.
+     *
+     * Devolve o id gerado: os testes de findById/update precisam dele para
+     * buscar de volta o produto certo.
      */
-    private function criarProduto(string $nome, bool $ativo, int $categoriaId = 1): void
+    private function criarProduto(string $nome, bool $ativo, int $categoriaId = 1): int
     {
         $sql = $this->pdo->prepare(
             'INSERT INTO products (name, category_id, unit, sale_price, active, created_at)
@@ -84,5 +144,7 @@ class ProductRepositoryTest extends DatabaseTestCase
 
             'criado_em'    => '2026-07-22 10:00:00',
         ]);
+
+        return (int) $this->pdo->lastInsertId();
     }
 }
