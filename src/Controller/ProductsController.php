@@ -39,12 +39,16 @@ class ProductsController
         // findActive() espera ?int, então convertemos: 1/2/3 passam; ausente ou
         // lixo ("abc") vira null, que a vitrine lê como "Todos".
         $categoryId = filter_input(INPUT_GET, 'category', FILTER_VALIDATE_INT) ?: null;
+        $busca = trim((string) filter_input(INPUT_GET, 'q')) ?: null;
+        $produtos = $this->products->findActive($categoryId, $busca);
 
         $this->view->render('Products/index', [
             'title'                => 'Produtos',
-            'produtos'             => $this->products->findActive($categoryId),
+            'produtos'             => $produtos,
             'categorias'           => self::CATEGORIAS,
             'categoriaSelecionada' => $categoryId,
+            'countItems'           => count($produtos),
+            'busca'                => $busca,
         ]);
     }
     

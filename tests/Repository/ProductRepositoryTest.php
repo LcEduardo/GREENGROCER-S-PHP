@@ -43,6 +43,23 @@ class ProductRepositoryTest extends DatabaseTestCase
         $this->assertSame('Maçã', $frutas[0]->name);
     }
 
+    /**
+     * A busca da nav: filtra por nome, sem distinguir maiúsculas/minúsculas, e
+     * continua respeitando o recorte por `active` junto com a categoria.
+     */
+    public function test_findActive_filtra_por_busca(): void
+    {
+        $this->criarCategoria(1, 'Legumes');
+        $this->criarProduto(nome: 'Tomate Italiano', ativo: true);
+        $this->criarProduto(nome: 'Cenoura', ativo: true);
+        $this->criarProduto(nome: 'tomate cereja', ativo: false);
+
+        $resultado = new ProductRepository($this->pdo)->findActive(search: 'tomate');
+
+        $this->assertCount(1, $resultado);
+        $this->assertSame('Tomate Italiano', $resultado[0]->name);
+    }
+
     public function test_findById_traz_o_produto_pelo_id(): void
     {
         $this->criarCategoria(1, 'Legumes');

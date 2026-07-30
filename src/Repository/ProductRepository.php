@@ -42,7 +42,7 @@ class ProductRepository
      *
      * @return Product[]
      */
-    public function findActive(?int $categoryId = null): array
+    public function findActive(?int $categoryId = null, ?string $search = null): array
     {
         // Cláusula e parâmetro nascem no MESMO if: some a repetição de checar
         // null duas vezes, e sem categoria o execute só recebe um array vazio.
@@ -55,6 +55,13 @@ class ProductRepository
         if ($categoryId !== null) {
             $sql .= ' AND category_id = :categoryId';
             $params['categoryId'] = $categoryId;
+        }
+
+        if ($search !== null) {
+            // LOWER() nos dois lados em vez de ILIKE: ILIKE não existe no SQLite
+            // dos testes, só no Postgres de produção.
+            $sql .= ' AND LOWER(name) LIKE LOWER(:search)';
+            $params['search'] = '%' . $search . '%';
         }
 
         $sql .= ' ORDER BY name';

@@ -8,6 +8,13 @@
 <body>
     <nav>
         <a href="/"><h2>Greengrocers.</h2></a>
+        <form action="/" method="get" role="search">
+            <?php if (!empty($categoriaSelecionada)): ?>
+                <input type="hidden" name="category" value="<?= (int) $categoriaSelecionada ?>">
+            <?php endif; ?>
+            <input type="search" name="q" value="<?= htmlspecialchars($busca ?? '') ?>" placeholder="Buscar produto...">
+            <button type="submit">Buscar</button>
+        </form>
         <a href="/admin/products">Products</a>
         <?php if (\User\Greengrocers\Auth\Guard::isLoggedIn()): ?>
             <a href="/logout">Sair</a>

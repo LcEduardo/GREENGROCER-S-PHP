@@ -1,10 +1,12 @@
 <h1><?= htmlspecialchars($title) ?></h1>
 
 <nav aria-label="Filtrar por categoria">
-    <a href="/"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>
+    <?php $sufixoBusca = $busca !== null ? '&q=' . urlencode($busca) : ''; ?>
+    <a href="/<?= $busca !== null ? '?q=' . urlencode($busca) : '' ?>"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>
     <?php foreach ($categorias as $id => $nome): ?>
-        <a href="/?category=<?= $id ?>"<?= $categoriaSelecionada === $id ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($nome) ?></a>
+        <a href="/?category=<?= $id . $sufixoBusca ?>"<?= $categoriaSelecionada === $id ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($nome) ?></a>
     <?php endforeach; ?>
+    <p><?= $countItems ?></p>
 </nav>
 
 <?php if (empty($produtos)): ?>
