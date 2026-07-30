@@ -15,7 +15,9 @@
             <input type="search" name="q" value="<?= htmlspecialchars($busca ?? '') ?>" placeholder="Buscar produto...">
             <button type="submit">Buscar</button>
         </form>
-        <a href="/admin/products">Products</a>
+        <?php if (\User\Greengrocers\Auth\Guard::isAdmin()): ?>
+            <a href="/admin/products">Products</a>
+        <?php endif; ?>
         <?php if (\User\Greengrocers\Auth\Guard::isLoggedIn()): ?>
             <a href="/logout">Sair</a>
         <?php else: ?>
