@@ -41,6 +41,20 @@ class UserRepository
         return $row === false ? null : $this->hydrate($row);
     }
 
+    public function findByEmail(string $email): ?User
+    {
+        $sql = 'SELECT id, name, email, password, admin'
+             . ' FROM users'
+             . ' WHERE email = :email';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['email' => $email]);
+
+        $row = $statement->fetch();
+
+        return $row === false ? null : $this->hydrate($row);
+    }
+
     /**
      * `password` chega já como HASH — quem gera é User::hashPassword(), não
      * o Repository. `admin` chega explícito de quem chama, igual o `active`

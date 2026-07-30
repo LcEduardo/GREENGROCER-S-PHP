@@ -78,4 +78,28 @@ class UserRepositoryTest extends DatabaseTestCase
 
         $this->assertNull($repository->findById(999));
     }
+
+    public function test_findByEmail_encontra_usuario_pelo_email(): void
+    {
+        $repository = new UserRepository($this->pdo);
+
+        $repository->create(
+            name: 'Ana',
+            email: 'ana@example.com',
+            password: User::hashPassword('senha123'),
+            admin: false,
+        );
+
+        $usuario = $repository->findByEmail('ana@example.com');
+
+        $this->assertNotNull($usuario);
+        $this->assertSame('Ana', $usuario->name);
+    }
+
+    public function test_findByEmail_retorna_null_quando_email_nao_existe(): void
+    {
+        $repository = new UserRepository($this->pdo);
+
+        $this->assertNull($repository->findByEmail('ninguem@example.com'));
+    }
 }
