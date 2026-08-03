@@ -17,8 +17,6 @@ if ($carrinhoLogado) {
     }
 }
 
-$carrinhoAberto = ($_GET['cart'] ?? null) === 'open';
-$caminhoAtual = htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -94,7 +92,7 @@ $caminhoAtual = htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/');
 
     <?= $content ?>
 
-    <input type="checkbox" id="cart-toggle" class="cart-toggle-input" <?= $carrinhoAberto ? 'checked' : '' ?>>
+    <input type="checkbox" id="cart-toggle" class="cart-toggle-input">
 
     <aside class="cart-panel">
         <label for="cart-toggle">Fechar ✕</label>

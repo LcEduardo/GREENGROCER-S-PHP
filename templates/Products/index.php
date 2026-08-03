@@ -33,7 +33,6 @@
                         <form action="/cart/add" method="post">
                             <input type="hidden" name="productId" value="<?= $produto->id ?>">
                             <input type="hidden" name="quantity" value="1">
-                            <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/') ?>">
                             <button type="submit">+</button>
                         </form>
                     </td>
