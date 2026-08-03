@@ -5,9 +5,11 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 use User\Greengrocers\Auth\Guard;
+use User\Greengrocers\Controller\CartController;
 use User\Greengrocers\Controller\ProductsController;
 use User\Greengrocers\Controller\SessionsController;
 use User\Greengrocers\Controller\UsersController;
+use User\Greengrocers\Repository\CartRepository;
 use User\Greengrocers\Repository\ProductRepository;
 use User\Greengrocers\Repository\UserRepository;
 use User\Greengrocers\Database\Connection;
@@ -61,6 +63,20 @@ switch ($path) {
             $controller->store();
         } else {
             $controller->create();
+        }
+        break;
+
+    case '/cart/add':
+        if (!Guard::isLoggedIn()) {
+            header('Location: /login');
+            break;
+        }
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $repo = new CartRepository(Connection::get());
+            (new CartController($repo))->store();
+        } else {
+            http_response_code(405);
         }
         break;
 
