@@ -41,6 +41,51 @@ class CartRepository
     }
 
     /**
+     * Diminui 1 unidade da quantidade do item. Se o resultado ficar abaixo de 1,
+     * remove a linha em vez de deixar o carrinho com quantidade zerada/negativa.
+     */
+    public function decreaseQuantity(int $userId, int $productId): void
+    {
+        $sql = 'SELECT quantity FROM cart WHERE user_id = :userId AND product_id = :productId';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['userId' => $userId, 'productId' => $productId]);
+
+        $row = $statement->fetch();
+
+        // Já não está no carrinho (ex.: duplo clique) — nada a fazer.
+        if ($row === false) {
+            return;
+        }
+
+        $novaQuantidade = (float) $row['quantity'] - 1;
+
+        if ($novaQuantidade < 1) {
+            $this->remove($userId, $productId);
+            return;
+        }
+
+        $sql = 'UPDATE cart SET quantity = :quantity, updated_at = :updatedAt'
+             . ' WHERE user_id = :userId AND product_id = :productId';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute([
+            'quantity'  => (string) $novaQuantidade,
+            'updatedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'userId'    => $userId,
+            'productId' => $productId,
+        ]);
+    }
+
+    private function remove(int $userId, int $productId): void
+    {
+        $sql = 'DELETE FROM cart WHERE user_id = :userId AND product_id = :productId';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['userId' => $userId, 'productId' => $productId]);
+    }
+
+    /**
      * @return CartItem[]
      */
     public function findByUser(int $userId): array

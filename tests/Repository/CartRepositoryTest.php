@@ -27,6 +27,47 @@ class CartRepositoryTest extends DatabaseTestCase
         $this->assertSame(2.0, (float) $itens[0]->quantity);
     }
 
+    public function test_decreaseQuantity_diminui_quando_resultado_fica_maior_ou_igual_a_um(): void
+    {
+        $userId = $this->criarUsuario();
+        $this->criarCategoria(1, 'Legumes');
+        $produtoId = $this->criarProduto(nome: 'Tomate');
+
+        $repository = new CartRepository($this->pdo);
+        $repository->addItem($userId, $produtoId, '3');
+        $repository->decreaseQuantity($userId, $produtoId);
+
+        $itens = $repository->findByUser($userId);
+
+        $this->assertCount(1, $itens);
+        $this->assertSame(2.0, (float) $itens[0]->quantity);
+    }
+
+    public function test_decreaseQuantity_remove_item_quando_resultado_fica_menor_que_um(): void
+    {
+        $userId = $this->criarUsuario();
+        $this->criarCategoria(1, 'Legumes');
+        $produtoId = $this->criarProduto(nome: 'Tomate');
+
+        $repository = new CartRepository($this->pdo);
+        $repository->addItem($userId, $produtoId, '1');
+        $repository->decreaseQuantity($userId, $produtoId);
+
+        $this->assertCount(0, $repository->findByUser($userId));
+    }
+
+    public function test_decreaseQuantity_nao_faz_nada_quando_produto_nao_esta_no_carrinho(): void
+    {
+        $userId = $this->criarUsuario();
+        $this->criarCategoria(1, 'Legumes');
+        $produtoId = $this->criarProduto(nome: 'Tomate');
+
+        $repository = new CartRepository($this->pdo);
+        $repository->decreaseQuantity($userId, $produtoId);
+
+        $this->assertCount(0, $repository->findByUser($userId));
+    }
+
     private function criarUsuario(): int
     {
         return new UserRepository($this->pdo)->create(

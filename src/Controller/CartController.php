@@ -21,4 +21,13 @@ class CartController
 
         header('Location: /');
     }
+
+    public function decrease(): void
+    {
+        $productId = (int) filter_input(INPUT_POST, 'productId', FILTER_VALIDATE_INT);
+
+        $this->cart->decreaseQuantity((int) $_SESSION['user_id'], $productId);
+
+        header('Location: /');
+    }
 }

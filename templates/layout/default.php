@@ -110,6 +110,10 @@ if ($carrinhoLogado) {
                     <li>
                         <?= htmlspecialchars($linha['produto']?->name ?? 'Produto removido') ?>
                         — <?= htmlspecialchars($linha['item']->quantity) ?>
+                        <form action="/cart/decrease" method="post" style="display:inline">
+                            <input type="hidden" name="productId" value="<?= $linha['item']->productId ?>">
+                            <button type="submit">-</button>
+                        </form>
                     </li>
                 <?php endforeach; ?>
             </ul>

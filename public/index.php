@@ -80,6 +80,20 @@ switch ($path) {
         }
         break;
 
+    case '/cart/decrease':
+        if (!Guard::isLoggedIn()) {
+            header('Location: /login');
+            break;
+        }
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $repo = new CartRepository(Connection::get());
+            (new CartController($repo))->decrease();
+        } else {
+            http_response_code(405);
+        }
+        break;
+
     case '/register':
         $repository = new UserRepository(Connection::get());
         $controller = new UsersController($repository);
