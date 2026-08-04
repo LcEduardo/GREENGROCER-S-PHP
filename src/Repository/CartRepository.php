@@ -26,8 +26,36 @@ class CartRepository
         );
     }
 
+    private function find(int $userId, int $productId): array|false
+    {
+        $sql = 'SELECT quantity FROM cart WHERE user_id = :userId AND product_id = :productId';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['userId' => $userId, 'productId' => $productId]);
+
+        return $statement->fetch();
+    }
+
     public function addItem(int $userId, int $productId, string $quantity): void
     {
+        $existQtd = $this->find($userId, $productId);
+
+        if ($existQtd !== false) {
+            $novaQuantidade = (string) ((float) $existQtd['quantity'] + (float) $quantity);
+
+            $sql = 'UPDATE cart SET quantity = :quantity, updated_at = :updatedAt'
+                . ' WHERE user_id = :userId AND product_id = :productId';
+
+            $statement = $this->pdo->prepare($sql);
+            $statement->execute([
+                'quantity'  => $novaQuantidade,
+                'updatedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                'userId'    => $userId,
+                'productId' => $productId,
+            ]);
+            return;
+        }
+
         $sql = 'INSERT INTO cart (user_id, product_id, quantity, updated_at)'
              . ' VALUES (:userId, :productId, :quantity, :updatedAt)';
 
@@ -46,12 +74,7 @@ class CartRepository
      */
     public function decreaseQuantity(int $userId, int $productId): void
     {
-        $sql = 'SELECT quantity FROM cart WHERE user_id = :userId AND product_id = :productId';
-
-        $statement = $this->pdo->prepare($sql);
-        $statement->execute(['userId' => $userId, 'productId' => $productId]);
-
-        $row = $statement->fetch();
+        $row = $this->find($userId, $productId);
 
         // Já não está no carrinho (ex.: duplo clique) — nada a fazer.
         if ($row === false) {
@@ -103,4 +126,5 @@ class CartRepository
 
         return $itens;
     }
+
 }
