@@ -18,6 +18,14 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
 session_start();
 
+// Mesmo critério do CartController::isAjax() — o cart.js seta esse header à
+// mão em toda chamada fetch(). Usado aqui pra decidir 401 (JS trata) vs.
+// redirect (form comum navegando) quando o carrinho é acessado deslogado.
+function isAjax(): bool
+{
+    return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+}
+
 switch ($path) {
     case '/':
         $repository = new ProductRepository(Connection::get());
@@ -68,13 +76,18 @@ switch ($path) {
 
     case '/cart/add':
         if (!Guard::isLoggedIn()) {
-            header('Location: /login');
+            if (isAjax()) {
+                http_response_code(401);
+            } else {
+                header('Location: /login');
+            }
             break;
         }
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-            $repo = new CartRepository(Connection::get());
-            (new CartController($repo))->store();
+            $cartRepo = new CartRepository(Connection::get());
+            $productRepo = new ProductRepository(Connection::get());
+            (new CartController($cartRepo, $productRepo))->store();
         } else {
             http_response_code(405);
         }
@@ -82,13 +95,18 @@ switch ($path) {
 
     case '/cart/decrease':
         if (!Guard::isLoggedIn()) {
-            header('Location: /login');
+            if (isAjax()) {
+                http_response_code(401);
+            } else {
+                header('Location: /login');
+            }
             break;
         }
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-            $repo = new CartRepository(Connection::get());
-            (new CartController($repo))->decrease();
+            $cartRepo = new CartRepository(Connection::get());
+            $productRepo = new ProductRepository(Connection::get());
+            (new CartController($cartRepo, $productRepo))->decrease();
         } else {
             http_response_code(405);
         }

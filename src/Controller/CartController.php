@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace User\Greengrocers\Controller;
 
 use User\Greengrocers\Repository\CartRepository;
+use User\Greengrocers\Repository\ProductRepository;
 
 class CartController
 {
-    public function __construct(private readonly CartRepository $cart)
-    {
+    public function __construct(
+        private readonly CartRepository $cart,
+        private readonly ProductRepository $products,
+    ) {
     }
 
     public function store(): void
@@ -19,7 +22,7 @@ class CartController
 
         $this->cart->addItem((int) $_SESSION['user_id'], $productId, $quantity);
 
-        header('Location: /');
+        $this->respond();
     }
 
     public function decrease(): void
@@ -28,6 +31,50 @@ class CartController
 
         $this->cart->decreaseQuantity((int) $_SESSION['user_id'], $productId);
 
-        header('Location: /');
+        $this->respond();
+    }
+
+    /**
+     * Chamada via fetch (ver public/js/cart.js): devolve o carrinho como JSON,
+     * pro JS redesenhar o painel sem reload. Form comum, sem JS: continua
+     * navegando de volta pra / — mesmo fallback de antes do AJAX.
+     */
+    private function respond(): void
+    {
+        if (!$this->isAjax()) {
+            header('Location: /');
+            return;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($this->cartData());
+    }
+
+    /**
+     * @return array{count: int, items: list<array{productId: int, name: string, quantity: string}>}
+     */
+    private function cartData(): array
+    {
+        $itens = $this->cart->findByUser((int) $_SESSION['user_id']);
+
+        $items = array_map(function ($item) {
+            $produto = $this->products->findById($item->productId);
+
+            return [
+                'productId' => $item->productId,
+                'name'      => $produto?->name ?? 'Produto removido',
+                'quantity'  => $item->quantity,
+            ];
+        }, $itens);
+
+        return ['count' => count($items), 'items' => $items];
+    }
+
+    // fetch() não manda X-Requested-With sozinho (isso era coisa do jQuery) —
+    // por isso o cart.js seta esse header à mão, e é ele que diferencia "veio
+    // do JS" de "form comum submetendo".
+    private function isAjax(): bool
+    {
+        return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
     }
 }

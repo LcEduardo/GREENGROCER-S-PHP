@@ -84,7 +84,7 @@ if ($carrinhoLogado) {
             <a href="/login">Entrar</a>
         <?php endif; ?>
         <?php if ($carrinhoLogado): ?>
-            <label for="cart-toggle">Carrinho (<?= count($itensCarrinho) ?>)</label>
+            <label id="cart-count" for="cart-toggle">Carrinho (<?= count($itensCarrinho) ?>)</label>
         <?php else: ?>
             <a href="/login">Carrinho</a>
         <?php endif; ?>
@@ -98,28 +98,35 @@ if ($carrinhoLogado) {
         <label for="cart-toggle">Fechar ✕</label>
         <h2>Seu carrinho</h2>
 
-        <?php if (empty($itensCarrinho)): ?>
-            <div class="cart-panel__empty">
-                <p>🧺</p>
-                <p>Your basket is empty</p>
-                <p>Add some fresh produce to get started.</p>
-            </div>
-        <?php else: ?>
-            <ul>
-                <?php foreach ($itensCarrinho as $linha): ?>
-                    <li>
-                        <?= htmlspecialchars($linha['produto']?->name ?? 'Produto removido') ?>
-                        — <?= htmlspecialchars($linha['item']->quantity) ?>
-                        <form action="/cart/decrease" method="post" style="display:inline">
-                            <input type="hidden" name="productId" value="<?= $linha['item']->productId ?>">
-                            <button type="submit">-</button>
-                        </form>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php endif; ?>
+        <!-- cart.js reescreve só o miolo abaixo (empty state ou <ul>) a cada
+             add/decrease via fetch — por isso precisa de um id fixo pra achar
+             onde entrar, sem depender da estrutura interna. -->
+        <div id="cart-panel-body">
+            <?php if (empty($itensCarrinho)): ?>
+                <div class="cart-panel__empty">
+                    <p>🧺</p>
+                    <p>Your basket is empty</p>
+                    <p>Add some fresh produce to get started.</p>
+                </div>
+            <?php else: ?>
+                <ul>
+                    <?php foreach ($itensCarrinho as $linha): ?>
+                        <li>
+                            <?= htmlspecialchars($linha['produto']?->name ?? 'Produto removido') ?>
+                            — <?= htmlspecialchars($linha['item']->quantity) ?>
+                            <form action="/cart/decrease" method="post" style="display:inline">
+                                <input type="hidden" name="productId" value="<?= $linha['item']->productId ?>">
+                                <button type="submit">-</button>
+                            </form>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
     </aside>
 
     <label for="cart-toggle" class="cart-panel__overlay"></label>
+
+    <script src="/js/cart.js" defer></script>
 </body>
 </html>
