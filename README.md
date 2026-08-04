@@ -225,3 +225,5 @@ Add some fresh produce to get started.
 Adicionando o item você verá ele na lista de itens com a quantidade e o preço total do item. Abaixo da lista de itens, será exibido o valor total do carrinho. O botão de checkout será exibido abaixo do valor total do carrinho. Mas só se existir items no carrinho. Caso não haja itens, o botão de checkout não será exibido.
 
 Dentro do carrinho, o usuário poderá alterar a quantidade do item. Caso ele altere a quantidade para 0, o item será removido do carrinho. Caso ele altere a quantidade para um número maior que 0, o valor total do item será atualizado e o valor total do carrinho também será atualizado.
+
+Para evitar que um duplo clique na hora de diminuir a quantidade do item quebre a aplicação, a IA sugeriu verificar se a consulta encontrou o item no carrinho: o `fetch()` do PDO retorna `false` quando não encontra nenhuma linha (não tem relação com o duplo clique em si, é assim que o PDO sinaliza "não achei nada"). Se não encontrou, o método encerra sem fazer nada, evitando o erro de tentar acessar um campo num valor booleano.
