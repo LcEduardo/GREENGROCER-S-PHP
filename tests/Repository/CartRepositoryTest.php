@@ -68,6 +68,29 @@ class CartRepositoryTest extends DatabaseTestCase
         $this->assertCount(0, $repository->findByUser($userId));
     }
 
+    public function test_qtdTotal_soma_quantidade_de_todos_os_itens_do_carrinho(): void
+    {
+        $userId = $this->criarUsuario();
+        $this->criarCategoria(1, 'Legumes');
+        $tomateId = $this->criarProduto(nome: 'Tomate');
+        $cebolaId = $this->criarProduto(nome: 'Cebola');
+
+        $repository = new CartRepository($this->pdo);
+        $repository->addItem($userId, $tomateId, '2.000');
+        $repository->addItem($userId, $cebolaId, '1.500');
+
+        $this->assertSame(3.5, $repository->qtdTotal($userId));
+    }
+
+    public function test_qtdTotal_retorna_zero_quando_carrinho_esta_vazio(): void
+    {
+        $userId = $this->criarUsuario();
+
+        $repository = new CartRepository($this->pdo);
+
+        $this->assertSame(0.0, $repository->qtdTotal($userId));
+    }
+
     private function criarUsuario(): int
     {
         return new UserRepository($this->pdo)->create(

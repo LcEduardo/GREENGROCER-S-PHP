@@ -4,6 +4,7 @@
 // aqui, e não passado no $data de cada render().
 $carrinhoLogado = \User\Greengrocers\Auth\Guard::isLoggedIn();
 $itensCarrinho = [];
+$qtdCarrinho = 0.0;
 
 if ($carrinhoLogado) {
     $cartRepository = new \User\Greengrocers\Repository\CartRepository(\User\Greengrocers\Database\Connection::get());
@@ -15,6 +16,8 @@ if ($carrinhoLogado) {
             'produto' => $productRepository->findById($itemCarrinho->productId),
         ];
     }
+
+    $qtdCarrinho = $cartRepository->qtdTotal((int) $_SESSION['user_id']);
 }
 
 ?>
@@ -84,7 +87,7 @@ if ($carrinhoLogado) {
             <a href="/login">Entrar</a>
         <?php endif; ?>
         <?php if ($carrinhoLogado): ?>
-            <label id="cart-count" for="cart-toggle">Carrinho (<?= count($itensCarrinho) ?>)</label>
+            <label id="cart-count" for="cart-toggle">Carrinho (<?= $qtdCarrinho ?>)</label>
         <?php else: ?>
             <a href="/login">Carrinho</a>
         <?php endif; ?>

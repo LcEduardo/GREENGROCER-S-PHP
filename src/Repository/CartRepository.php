@@ -127,4 +127,14 @@ class CartRepository
         return $itens;
     }
 
+    public function qtdTotal(int $userId): float
+    {
+        $sql = 'SELECT COALESCE(SUM(quantity), 0) FROM cart WHERE user_id = :userId';
+
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute(['userId' => $userId]);
+
+        return (float) $statement->fetchColumn();
+    }
+
 }

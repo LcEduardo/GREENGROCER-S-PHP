@@ -51,11 +51,12 @@ class CartController
     }
 
     /**
-     * @return array{count: int, items: list<array{productId: int, name: string, quantity: string}>}
+     * @return array{count: float, items: list<array{productId: int, name: string, quantity: string}>}
      */
     private function cartData(): array
     {
-        $itens = $this->cart->findByUser((int) $_SESSION['user_id']);
+        $userId = (int) $_SESSION['user_id'];
+        $itens = $this->cart->findByUser($userId);
 
         $items = array_map(function ($item) {
             $produto = $this->products->findById($item->productId);
@@ -67,7 +68,9 @@ class CartController
             ];
         }, $itens);
 
-        return ['count' => count($items), 'items' => $items];
+        // 'count' é a quantidade total do carrinho (soma das quantidades),
+        // não o número de produtos distintos — é o que o badge da nav mostra.
+        return ['count' => $this->cart->qtdTotal($userId), 'items' => $items];
     }
 
     // fetch() não manda X-Requested-With sozinho (isso era coisa do jQuery) —
