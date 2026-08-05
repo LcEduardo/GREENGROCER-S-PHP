@@ -121,6 +121,11 @@ if ($carrinhoLogado) {
                                 <input type="hidden" name="productId" value="<?= $linha['item']->productId ?>">
                                 <button type="submit">-</button>
                             </form>
+                            <form action="/cart/add" method="post" style="display:inline">
+                                <input type="hidden" name="productId" value="<?= $linha['item']->productId ?>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit">+</button>
+                            </form>
                         </li>
                     <?php endforeach; ?>
                 </ul>

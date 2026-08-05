@@ -90,22 +90,38 @@ function criarItem(item) {
     const li = document.createElement('li');
     li.append(`${item.name} — ${item.quantity} `);
 
+    li.append(criarFormQuantidade('/cart/decrease', item.productId, '-'));
+    li.append(criarFormQuantidade('/cart/add', item.productId, '+', '1'));
+
+    return li;
+}
+
+// quantidade: valor fixo mandado no form (ex.: "1" pro +) — quando omitido,
+// o form só manda productId (caso do -, que sempre tira 1 no servidor).
+function criarFormQuantidade(action, productId, rotulo, quantidade) {
     const form = document.createElement('form');
-    form.action = '/cart/decrease';
+    form.action = action;
     form.method = 'post';
     form.style.display = 'inline';
 
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'productId';
-    input.value = item.productId;
+    const inputProduto = document.createElement('input');
+    inputProduto.type = 'hidden';
+    inputProduto.name = 'productId';
+    inputProduto.value = productId;
+    form.append(inputProduto);
+
+    if (quantidade !== undefined) {
+        const inputQuantidade = document.createElement('input');
+        inputQuantidade.type = 'hidden';
+        inputQuantidade.name = 'quantity';
+        inputQuantidade.value = quantidade;
+        form.append(inputQuantidade);
+    }
 
     const botao = document.createElement('button');
     botao.type = 'submit';
-    botao.textContent = '-';
+    botao.textContent = rotulo;
+    form.append(botao);
 
-    form.append(input, botao);
-    li.append(form);
-
-    return li;
+    return form;
 }
