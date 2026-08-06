@@ -80,12 +80,14 @@ class ProductRepository
 
     public function findAllProducts(): array
     {
-        $sql = $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, active,image'
-                    . ' FROM products'
-                    . ' order by active desc';
+        $sql = 'SELECT id, name, category_id, unit, sale_price, stock_quantity, active, image'
+             . ' FROM products'
+             . ' ORDER BY active DESC';
 
         $statement = $this->pdo->prepare($sql);
         $statement->execute();
+
+        $produtos = [];
 
         foreach ($statement as $row) {
             $produtos[] = $this->hydrate($row);

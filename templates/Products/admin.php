@@ -7,6 +7,7 @@
         <thead>
             <tr>
                 <th>Produto</th>
+                <th>Categoria</th>
                 <th>Unidade</th>
                 <th>Preço</th>
                 <th>Estoque</th>
@@ -18,6 +19,7 @@
             <?php foreach ($produtos as $produto): ?>
                 <tr>
                     <td><?= htmlspecialchars($produto->name) ?></td>
+                    <td><?= htmlspecialchars($categorias[$produto->categoryId] ?? '') ?></td>
                     <td><?= htmlspecialchars($produto->unit) ?></td>
                     <td><?= $produto->formattedPrice() ?></td>
                     <td><?= $produto->formattedStock() ?></td>

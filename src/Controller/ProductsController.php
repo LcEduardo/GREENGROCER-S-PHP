@@ -55,8 +55,9 @@ class ProductsController
     public function admin(): void
     {
         $this->view->render('Products/admin', [
-            'title'    => 'Produtos',
-            'produtos' => $this->products->findAllProducts(),
+            'title'      => 'Produtos',
+            'produtos'   => $this->products->findAllProducts(),
+            'categorias' => self::CATEGORIAS,
         ]);
     }
 
