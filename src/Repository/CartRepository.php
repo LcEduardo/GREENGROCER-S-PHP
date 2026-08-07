@@ -137,4 +137,37 @@ class CartRepository
         return (float) $statement->fetchColumn();
     }
 
+    /**
+     * Junta o carrinho do usuário com os produtos (nome, preço) — a mesma
+     * junção que templates/layout/default.php (primeiro paint) e
+     * CartController::cartData() (resposta do AJAX) precisam fazer, cada um
+     * pra desenhar o carrinho no seu formato (HTML vs. JSON). Antes cada um
+     * tinha seu próprio loop somando `salePrice × quantity`; centralizado
+     * aqui, a soma só existe numa fórmula.
+     *
+     * $products entra por parâmetro (em vez de no construtor) porque
+     * CartRepository não tem motivo pra depender de ProductRepository o
+     * tempo todo — só neste método, que é o único que junta os dois.
+     *
+     * @return array{items: list<array{item: CartItem, produto: ?\User\Greengrocers\Model\Product}>, count: float, total: float}
+     */
+    public function resumo(int $userId, ProductRepository $products): array
+    {
+        $itens = $this->findByUser($userId);
+        $total = 0.0;
+
+        $linhas = array_map(function (CartItem $item) use ($products, &$total) {
+            $produto = $products->findById($item->productId);
+            $total += ($produto !== null ? (float) $produto->salePrice : 0.0) * (float) $item->quantity;
+
+            return ['item' => $item, 'produto' => $produto];
+        }, $itens);
+
+        return [
+            'items' => $linhas,
+            'count' => $this->qtdTotal($userId),
+            'total' => $total,
+        ];
+    }
+
 }

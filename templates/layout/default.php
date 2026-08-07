@@ -5,19 +5,20 @@
 $carrinhoLogado = \User\Greengrocers\Auth\Guard::isLoggedIn();
 $itensCarrinho = [];
 $qtdCarrinho = 0.0;
+$totalCarrinhoFormatado = 'R$ 0,00';
 
 if ($carrinhoLogado) {
     $cartRepository = new \User\Greengrocers\Repository\CartRepository(\User\Greengrocers\Database\Connection::get());
     $productRepository = new \User\Greengrocers\Repository\ProductRepository(\User\Greengrocers\Database\Connection::get());
 
-    foreach ($cartRepository->findByUser((int) $_SESSION['user_id']) as $itemCarrinho) {
-        $itensCarrinho[] = [
-            'item'    => $itemCarrinho,
-            'produto' => $productRepository->findById($itemCarrinho->productId),
-        ];
-    }
+    // resumo() junta carrinho + produtos e já soma o total — é o mesmo
+    // método que CartController::cartData() chama pra responder o AJAX,
+    // então a fórmula do total existe num lugar só.
+    $resumo = $cartRepository->resumo((int) $_SESSION['user_id'], $productRepository);
 
-    $qtdCarrinho = $cartRepository->qtdTotal((int) $_SESSION['user_id']);
+    $itensCarrinho = $resumo['items'];
+    $qtdCarrinho = $resumo['count'];
+    $totalCarrinhoFormatado = 'R$ ' . number_format($resumo['total'], 2, ',', '.');
 }
 
 ?>
@@ -27,71 +28,59 @@ if ($carrinhoLogado) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($title ?? 'Greengrocers') ?></title>
-    <style>
-        .cart-toggle-input { display: none; }
-
-        .cart-panel {
-            position: fixed;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 320px;
-            max-width: 90vw;
-            background: #fff;
-            border-left: 1px solid #ccc;
-            padding: 1rem;
-            overflow-y: auto;
-            transform: translateX(100%);
-            transition: transform 0.2s ease;
-            z-index: 2;
-        }
-
-        .cart-toggle-input:checked ~ .cart-panel {
-            transform: translateX(0);
-        }
-
-        .cart-panel__overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1;
-        }
-
-        .cart-toggle-input:checked ~ .cart-panel__overlay {
-            display: block;
-        }
-
-        .cart-panel__empty {
-            text-align: center;
-            margin-top: 3rem;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav>
-        <a href="/"><h2>Greengrocers.</h2></a>
-        <form action="/" method="get" role="search">
-            <?php if (!empty($categoriaSelecionada)): ?>
-                <input type="hidden" name="category" value="<?= (int) $categoriaSelecionada ?>">
+    <header class="gg-header">
+        <div class="gg-header__bar">
+            <a href="/" class="gg-logo">
+                <span class="gg-logo__mark"><span class="gg-logo__leaf"></span></span>
+                <span class="gg-logo__word">greengrocers<span>.</span></span>
+            </a>
+
+            <form action="/" method="get" role="search" class="gg-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <?php if (!empty($categoriaSelecionada)): ?>
+                    <input type="hidden" name="category" value="<?= (int) $categoriaSelecionada ?>">
+                <?php endif; ?>
+                <input type="search" name="q" value="<?= htmlspecialchars($busca ?? '') ?>" placeholder="Buscar produto...">
+                <button type="submit">Buscar</button>
+            </form>
+
+            <nav class="gg-nav">
+                <?php if (\User\Greengrocers\Auth\Guard::isAdmin()): ?>
+                    <a href="/admin/products">Products</a>
+                <?php endif; ?>
+                <?php if (\User\Greengrocers\Auth\Guard::isLoggedIn()): ?>
+                    <a href="/logout">Sair</a>
+                <?php else: ?>
+                    <a href="/login">Entrar</a>
+                <?php endif; ?>
+            </nav>
+
+            <?php if ($carrinhoLogado): ?>
+                <label for="cart-toggle" class="gg-cart-button">
+                    <span class="gg-cart-icon">
+                        <span class="gg-cart-icon__body"></span>
+                        <span class="gg-cart-icon__handle"></span>
+                        <span id="cart-count" class="gg-cart-badge"><?= $qtdCarrinho ?></span>
+                    </span>
+                    <span id="cart-total"><?= $totalCarrinhoFormatado ?></span>
+                </label>
+            <?php else: ?>
+                <a href="/login" class="gg-cart-button">
+                    <span class="gg-cart-icon">
+                        <span class="gg-cart-icon__body"></span>
+                        <span class="gg-cart-icon__handle"></span>
+                    </span>
+                    <span>Carrinho</span>
+                </a>
             <?php endif; ?>
-            <input type="search" name="q" value="<?= htmlspecialchars($busca ?? '') ?>" placeholder="Buscar produto...">
-            <button type="submit">Buscar</button>
-        </form>
-        <?php if (\User\Greengrocers\Auth\Guard::isAdmin()): ?>
-            <a href="/admin/products">Products</a>
-        <?php endif; ?>
-        <?php if (\User\Greengrocers\Auth\Guard::isLoggedIn()): ?>
-            <a href="/logout">Sair</a>
-        <?php else: ?>
-            <a href="/login">Entrar</a>
-        <?php endif; ?>
-        <?php if ($carrinhoLogado): ?>
-            <label id="cart-count" for="cart-toggle">Carrinho (<?= $qtdCarrinho ?>)</label>
-        <?php else: ?>
-            <a href="/login">Carrinho</a>
-        <?php endif; ?>
-    </nav>
+        </div>
+    </header>
 
     <?= $content ?>
 

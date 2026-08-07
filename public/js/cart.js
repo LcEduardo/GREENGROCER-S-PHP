@@ -51,9 +51,16 @@ async function submitCartForm(form) {
 }
 
 function renderCart(carrinho) {
+    // Badge redonda sobre o ícone da sacola (contagem) + preço total ao lado
+    // — ver templates/layout/default.php pro mesmo markup no primeiro load.
     const contador = document.getElementById('cart-count');
     if (contador) {
-        contador.textContent = `Carrinho (${carrinho.count})`;
+        contador.textContent = carrinho.count;
+    }
+
+    const total = document.getElementById('cart-total');
+    if (total) {
+        total.textContent = carrinho.total;
     }
 
     const corpo = document.getElementById('cart-panel-body');

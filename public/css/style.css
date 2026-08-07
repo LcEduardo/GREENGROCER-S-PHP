@@ -1,0 +1,286 @@
+/* Greengrocers — estilo importado do Claude Design
+   (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html).
+
+   Só o cabeçalho/nav por enquanto — o resto do app (vitrine, admin,
+   formulários, rodapé, painel do carrinho) fica com o visual atual até as
+   próximas rodadas. Por isso as regras aqui são todas prefixadas .gg-header
+   e não tocam em body/table/form/etc. */
+
+:root {
+    --gg-green-950: #14562b;
+    --gg-green-500: #3fa34d;
+    --gg-cream-light: #f6efdd;
+    --gg-gold: #f2c14e;
+    --gg-brown-800: #3a2e0a;
+    --gg-red: #e05b49;
+    --gg-tan-border: #d8cba7;
+    --gg-ink: #2a2a25;
+
+    --gg-font-display: 'Fredoka', sans-serif;
+    --gg-font-body: 'Nunito', sans-serif;
+}
+
+@keyframes ggPop {
+    0% { transform: scale(.4); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== HEADER / NAV ===== */
+
+.gg-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--gg-green-950);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .16);
+}
+
+.gg-header__bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+.gg-header__bar * {
+    box-sizing: border-box;
+}
+
+.gg-logo {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    flex: none;
+    text-decoration: none;
+}
+
+.gg-logo__mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gg-green-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .15);
+    flex: none;
+}
+
+.gg-logo__leaf {
+    width: 15px;
+    height: 19px;
+    background: #eafbe9;
+    border-radius: 0 60% 0 60%;
+    transform: rotate(45deg);
+}
+
+.gg-logo__word {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 24px;
+    color: var(--gg-cream-light);
+    letter-spacing: -.5px;
+    line-height: 1;
+}
+
+.gg-logo__word span {
+    color: var(--gg-gold);
+}
+
+.gg-search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--gg-cream-light);
+    border-radius: 999px;
+    padding: 9px 16px;
+    max-width: 440px;
+    min-width: 160px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .08);
+}
+
+.gg-search svg {
+    flex: none;
+    color: #7a8a5e;
+}
+
+.gg-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: var(--gg-font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gg-ink);
+    width: 100%;
+    padding: 0;
+}
+
+.gg-search button {
+    border: none;
+    background: var(--gg-tan-border);
+    color: #5a5236;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    flex: none;
+}
+
+.gg-nav {
+    display: flex;
+    gap: 2px;
+    flex: none;
+    align-items: center;
+    background: rgba(0, 0, 0, .15);
+    border-radius: 999px;
+    padding: 4px;
+}
+
+.gg-nav a {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+    color: var(--gg-cream-light);
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    transition: background .15s;
+    line-height: 1;
+}
+
+.gg-nav a:hover {
+    background: rgba(0, 0, 0, .2);
+}
+
+.gg-cart-button {
+    flex: none;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gg-gold);
+    border: none;
+    border-radius: 999px;
+    padding: 9px 16px 9px 14px;
+    cursor: pointer;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--gg-brown-800);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, .18);
+    transition: filter .15s;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.gg-cart-button:hover {
+    filter: brightness(1.08);
+}
+
+/* Sacola desenhada em CSS (corpo + alça), igual ao mock — sem emoji, sem
+   requisição extra de ícone. */
+.gg-cart-icon {
+    position: relative;
+    width: 22px;
+    height: 20px;
+    flex: none;
+}
+
+.gg-cart-icon__body {
+    position: absolute;
+    inset: 0;
+    border: 2.5px solid var(--gg-brown-800);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+}
+
+.gg-cart-icon__handle {
+    position: absolute;
+    top: -6px;
+    left: 3px;
+    width: 14px;
+    height: 8px;
+    border: 2.5px solid var(--gg-brown-800);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Badge redonda com a contagem, sobre o ícone. cart.js troca só o
+   textContent (ver renderCart() em public/js/cart.js) — nunca o
+   markup ao redor, então o layout aqui sobrevive ao AJAX. */
+.gg-cart-badge {
+    position: absolute;
+    top: -10px;
+    right: -11px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    background: var(--gg-red);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--gg-font-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px var(--gg-gold);
+    animation: ggPop .3s ease;
+}
+
+/* ===== PAINEL DO CARRINHO =====
+   Movido tal e qual do <style> que vivia em templates/layout/default.php —
+   ainda não é a rodada do drawer, então as regras aqui são as mesmas de
+   antes, só que agora no mesmo arquivo do resto do CSS. */
+
+.cart-toggle-input { display: none; }
+
+.cart-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 320px;
+    max-width: 90vw;
+    background: #fff;
+    border-left: 1px solid #ccc;
+    padding: 1rem;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+    z-index: 2;
+}
+
+.cart-toggle-input:checked ~ .cart-panel {
+    transform: translateX(0);
+}
+
+.cart-panel__overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.cart-toggle-input:checked ~ .cart-panel__overlay {
+    display: block;
+}
+
+.cart-panel__empty {
+    text-align: center;
+    margin-top: 3rem;
+}

@@ -6,6 +6,7 @@ namespace User\Greengrocers\Tests\Repository;
 
 use User\Greengrocers\Model\User;
 use User\Greengrocers\Repository\CartRepository;
+use User\Greengrocers\Repository\ProductRepository;
 use User\Greengrocers\Repository\UserRepository;
 use User\Greengrocers\Tests\Support\DatabaseTestCase;
 
@@ -91,6 +92,47 @@ class CartRepositoryTest extends DatabaseTestCase
         $this->assertSame(0.0, $repository->qtdTotal($userId));
     }
 
+    /**
+     * resumo() é o método que junta CartRepository + ProductRepository — a
+     * mesma junção que templates/layout/default.php e CartController::cartData()
+     * faziam cada um por conta própria, com a soma do total calculada num
+     * lugar só em vez de duas vezes.
+     */
+    public function test_resumo_traz_itens_contagem_e_total_do_carrinho(): void
+    {
+        $userId = $this->criarUsuario();
+        $this->criarCategoria(1, 'Legumes');
+        $tomateId = $this->criarProduto(nome: 'Tomate', precoVenda: '4.00');
+        $cebolaId = $this->criarProduto(nome: 'Cebola', precoVenda: '2.50');
+
+        $repository = new CartRepository($this->pdo);
+        $repository->addItem($userId, $tomateId, '2'); // 2 × 4,00 = 8,00
+        $repository->addItem($userId, $cebolaId, '3'); // 3 × 2,50 = 7,50
+
+        $resumo = $repository->resumo($userId, new ProductRepository($this->pdo));
+
+        $this->assertCount(2, $resumo['items']);
+        $this->assertSame(5.0, $resumo['count']);
+        $this->assertSame(15.5, $resumo['total']);
+
+        // Cada linha traz o CartItem E o Product juntos — é o que o painel
+        // do carrinho (default.php) precisa pra exibir nome + quantidade.
+        $this->assertSame($tomateId, $resumo['items'][0]['item']->productId);
+        $this->assertSame('Tomate', $resumo['items'][0]['produto']->name);
+    }
+
+    public function test_resumo_retorna_vazio_quando_carrinho_esta_vazio(): void
+    {
+        $userId = $this->criarUsuario();
+
+        $repository = new CartRepository($this->pdo);
+        $resumo = $repository->resumo($userId, new ProductRepository($this->pdo));
+
+        $this->assertSame([], $resumo['items']);
+        $this->assertSame(0.0, $resumo['count']);
+        $this->assertSame(0.0, $resumo['total']);
+    }
+
     private function criarUsuario(): int
     {
         return new UserRepository($this->pdo)->create(
@@ -113,7 +155,7 @@ class CartRepositoryTest extends DatabaseTestCase
         $sql->execute(['id' => $id, 'nome' => $nome]);
     }
 
-    private function criarProduto(string $nome, int $categoriaId = 1): int
+    private function criarProduto(string $nome, int $categoriaId = 1, string $precoVenda = '7.90'): int
     {
         $sql = $this->pdo->prepare(
             'INSERT INTO products (name, category_id, unit, sale_price, active, created_at)
@@ -124,7 +166,7 @@ class CartRepositoryTest extends DatabaseTestCase
             'nome'         => $nome,
             'categoria_id' => $categoriaId,
             'unidade'      => 'kg',
-            'preco'        => '7.90',
+            'preco'        => $precoVenda,
             'ativo'        => 1,
             'criado_em'    => '2026-07-22 10:00:00',
         ]);
