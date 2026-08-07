@@ -11,7 +11,25 @@
 * {
     margin: 0px;
     padding: 0px;
-}   
+}
+
+/* Sticky footer: body ocupa a viewport inteira como flex column, o
+   <main> (envolve $content em templates/layout/default.php) cresce pra
+   preencher o espaço sobrando, e o footer sobra sempre no fim — mesmo
+   em páginas com pouco conteúdo. */
+html, body {
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.gg-main {
+    flex: 1 0 auto;
+}
 
 :root {
     --gg-green-950: #14562b;

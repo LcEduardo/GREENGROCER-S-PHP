@@ -84,7 +84,9 @@ if ($carrinhoLogado) {
         </div>
     </header>
 
-    <?= $content ?>
+    <main class="gg-main">
+        <?= $content ?>
+    </main>
 
     <footer class="gg-footer">
         <div class="gg-footer__bar">
