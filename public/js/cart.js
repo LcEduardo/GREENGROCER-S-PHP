@@ -64,29 +64,51 @@ function renderCart(carrinho) {
     }
 
     const corpo = document.getElementById('cart-panel-body');
-    if (!corpo) {
+    if (corpo) {
+        corpo.innerHTML = '';
+
+        if (carrinho.items.length === 0) {
+            corpo.append(criarEstadoVazio());
+        } else {
+            const lista = document.createElement('ul');
+            lista.className = 'cart-panel__list';
+            carrinho.items.forEach((item) => lista.append(criarItem(item)));
+            corpo.append(lista);
+        }
+    }
+
+    atualizarRodapeCarrinho(carrinho);
+}
+
+// Rodapé (total + "Finalizar compra") some com o carrinho vazio, igual ao
+// mock — mesma condição que templates/layout/default.php usa no primeiro
+// paint (`empty($itensCarrinho)`).
+function atualizarRodapeCarrinho(carrinho) {
+    const rodape = document.getElementById('cart-panel-footer');
+    if (!rodape) {
         return;
     }
 
-    corpo.innerHTML = '';
+    rodape.style.display = carrinho.items.length === 0 ? 'none' : '';
 
-    if (carrinho.items.length === 0) {
-        corpo.append(criarEstadoVazio());
-        return;
+    const contagem = document.getElementById('cart-panel-footer-count');
+    if (contagem) {
+        contagem.textContent = carrinho.count;
     }
 
-    const lista = document.createElement('ul');
-    carrinho.items.forEach((item) => lista.append(criarItem(item)));
-    corpo.append(lista);
+    const valorTotal = document.getElementById('cart-panel-footer-total');
+    if (valorTotal) {
+        valorTotal.textContent = carrinho.total;
+    }
 }
 
 function criarEstadoVazio() {
     const vazio = document.createElement('div');
     vazio.className = 'cart-panel__empty';
     vazio.innerHTML = `
-        <p>🧺</p>
-        <p>Your basket is empty</p>
-        <p>Add some fresh produce to get started.</p>
+        <p class="cart-panel__empty-icon">🧺</p>
+        <p class="cart-panel__empty-title">Your basket is empty</p>
+        <p class="cart-panel__empty-sub">Add some fresh produce to get started.</p>
     `;
     return vazio;
 }
@@ -95,10 +117,45 @@ function criarEstadoVazio() {
 // via createElement/append (não innerHTML) pra item.name nunca virar HTML.
 function criarItem(item) {
     const li = document.createElement('li');
-    li.append(`${item.name} — ${item.quantity} `);
+    li.className = 'cart-panel__item';
 
-    li.append(criarFormQuantidade('/cart/decrease', item.productId, '-'));
-    li.append(criarFormQuantidade('/cart/add', item.productId, '+', '1'));
+    const info = document.createElement('div');
+    info.className = 'cart-panel__item-info';
+
+    const nome = document.createElement('span');
+    nome.className = 'cart-panel__item-name';
+    nome.textContent = item.name;
+    info.append(nome);
+
+    // priceLabel vem nulo quando o produto foi removido (ver
+    // CartController::cartData()) — sem preço, não tem "cada" pra mostrar.
+    if (item.priceLabel) {
+        const preco = document.createElement('span');
+        preco.className = 'cart-panel__item-price';
+        preco.textContent = `${item.priceLabel} cada`;
+        info.append(preco);
+    }
+
+    li.append(info);
+
+    const stepper = document.createElement('div');
+    stepper.className = 'cart-panel__item-stepper';
+    stepper.append(criarFormQuantidade('/cart/decrease', item.productId, '–'));
+
+    const quantidade = document.createElement('span');
+    quantidade.className = 'cart-panel__item-qty';
+    quantidade.textContent = item.quantity;
+    stepper.append(quantidade);
+
+    stepper.append(criarFormQuantidade('/cart/add', item.productId, '+', '1'));
+    li.append(stepper);
+
+    if (item.lineLabel) {
+        const totalLinha = document.createElement('span');
+        totalLinha.className = 'cart-panel__item-total';
+        totalLinha.textContent = item.lineLabel;
+        li.append(totalLinha);
+    }
 
     return li;
 }

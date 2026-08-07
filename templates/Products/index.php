@@ -1,5 +1,3 @@
-<h1><?= htmlspecialchars($title) ?></h1>
-
 <nav aria-label="Filtrar por categoria">
     <?php $sufixoBusca = $busca !== null ? '&q=' . urlencode($busca) : ''; ?>
     <a href="/<?= $busca !== null ? '?q=' . urlencode($busca) : '' ?>"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>

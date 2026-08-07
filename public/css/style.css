@@ -1,14 +1,24 @@
 /* Greengrocers — estilo importado do Claude Design
    (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html).
 
-   Só o cabeçalho/nav por enquanto — o resto do app (vitrine, admin,
-   formulários, rodapé, painel do carrinho) fica com o visual atual até as
-   próximas rodadas. Por isso as regras aqui são todas prefixadas .gg-header
-   e não tocam em body/table/form/etc. */
+   Este arquivo carrega só o que é reaproveitado por TODOS os outros
+   estilos: os tokens (:root) e o cabeçalho/nav (.gg-header), que é o mais
+   antigo dos três componentes de templates/layout/default.php. Rodapé e
+   painel do carrinho têm cada um seu próprio arquivo — ver footer.css e
+   cart-panel.css. A vitrine, o admin e os formulários ficam com o visual
+   atual até as próximas rodadas.*/
+
+* {
+    margin: 0px;
+    padding: 0px;
+}   
 
 :root {
     --gg-green-950: #14562b;
+    --gg-green-600: #2f8f43;
     --gg-green-500: #3fa34d;
+    --gg-green-700: #1c6b35;
+    --gg-cream: #f4ead2;
     --gg-cream-light: #f6efdd;
     --gg-gold: #f2c14e;
     --gg-brown-800: #3a2e0a;
@@ -25,6 +35,7 @@
     60% { transform: scale(1.15); }
     100% { transform: scale(1); opacity: 1; }
 }
+
 
 /* ===== HEADER / NAV ===== */
 
@@ -241,46 +252,3 @@
     animation: ggPop .3s ease;
 }
 
-/* ===== PAINEL DO CARRINHO =====
-   Movido tal e qual do <style> que vivia em templates/layout/default.php —
-   ainda não é a rodada do drawer, então as regras aqui são as mesmas de
-   antes, só que agora no mesmo arquivo do resto do CSS. */
-
-.cart-toggle-input { display: none; }
-
-.cart-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 320px;
-    max-width: 90vw;
-    background: #fff;
-    border-left: 1px solid #ccc;
-    padding: 1rem;
-    overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform 0.2s ease;
-    z-index: 2;
-}
-
-.cart-toggle-input:checked ~ .cart-panel {
-    transform: translateX(0);
-}
-
-.cart-panel__overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 1;
-}
-
-.cart-toggle-input:checked ~ .cart-panel__overlay {
-    display: block;
-}
-
-.cart-panel__empty {
-    text-align: center;
-    margin-top: 3rem;
-}

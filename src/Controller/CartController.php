@@ -51,7 +51,7 @@ class CartController
     }
 
     /**
-     * @return array{count: float, total: string, items: list<array{productId: int, name: string, quantity: string}>}
+     * @return array{count: float, total: string, items: list<array{productId: int, name: string, quantity: string, priceLabel: ?string, lineLabel: ?string}>}
      */
     private function cartData(): array
     {
@@ -60,11 +60,23 @@ class CartController
         // uma em cada lugar que precisa mostrar o carrinho.
         $resumo = $this->cart->resumo((int) $_SESSION['user_id'], $this->products);
 
-        $items = array_map(fn (array $linha) => [
-            'productId' => $linha['item']->productId,
-            'name'      => $linha['produto']?->name ?? 'Produto removido',
-            'quantity'  => $linha['item']->quantity,
-        ], $resumo['items']);
+        // priceLabel/lineLabel ficam nulos quando o produto foi removido —
+        // mesmo caso que 'Produto removido' cobre pro name, só que aqui não
+        // há preço nenhum pra mostrar (nem "cada", nem o total da linha).
+        $items = array_map(function (array $linha) {
+            $produto = $linha['produto'];
+            $quantidade = (float) $linha['item']->quantity;
+
+            return [
+                'productId'  => $linha['item']->productId,
+                'name'       => $produto?->name ?? 'Produto removido',
+                'quantity'   => $linha['item']->quantity,
+                'priceLabel' => $produto?->formattedPrice(),
+                'lineLabel'  => $produto !== null
+                    ? 'R$ ' . number_format((float) $produto->salePrice * $quantidade, 2, ',', '.')
+                    : null,
+            ];
+        }, $resumo['items']);
 
         // 'count' é a quantidade total do carrinho (soma das quantidades),
         // não o número de produtos distintos — é o que o badge da nav mostra.
