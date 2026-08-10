@@ -1,0 +1,18 @@
+/* Carregamento das fontes do Claude Design
+   (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html).
+
+   Só o download das famílias mora aqui. Quem as usa referencia sempre pelos
+   tokens --gg-font-* definidos no :root de style.css, nunca pelo nome da
+   família solta — assim trocar uma fonte é mexer neste arquivo e no token,
+   e não caçar 'Fredoka' espalhado pelos componentes.
+
+   - Fredoka  → --gg-font-display: títulos, nomes de produto, botões
+   - Nunito   → --gg-font-body:    textos corridos, rótulos, preços de lista
+   - Caveat   → --gg-font-hand:    o que o mock escreve à mão (chamada do
+                                   banner e preço a giz na plaquinha do card)
+
+   Os <link rel="preconnect"> pro Google Fonts continuam em
+   templates/layout/default.php: precisam sair no <head> antes deste
+   stylesheet ser buscado, senão não adiantam nada. */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap');

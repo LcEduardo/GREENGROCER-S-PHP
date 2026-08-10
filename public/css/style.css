@@ -25,6 +25,14 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+
+    background: var(--gg-cream);
+    font-family: var(--gg-font-body);
+    color: var(--gg-ink);
+}
+
+::selection {
+    background: #c7e6ca;
 }
 
 .gg-main {
@@ -46,6 +54,9 @@ body {
 
     --gg-font-display: 'Fredoka', sans-serif;
     --gg-font-body: 'Nunito', sans-serif;
+    /* Manuscrita — só o que no mock é "escrito à mão": a chamada do banner e
+       o preço a giz na plaquinha do card. */
+    --gg-font-hand: 'Caveat', cursive;
 }
 
 @keyframes ggPop {

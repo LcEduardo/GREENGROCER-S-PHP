@@ -1,0 +1,402 @@
+/* Vitrine (templates/Products/index.php) — importado do Claude Design
+   (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html,
+   view `isShopView`).
+
+   Depende dos tokens (:root) definidos em style.css, que precisa vir antes
+   deste <link> no <head>.
+
+   O mock desenha a barraca em três camadas — o toldo listrado do banner, a
+   caixa de madeira do card e o recuo escuro onde a fruta descansa. Tudo é
+   gradiente CSS: nenhuma imagem de textura entra aqui. */
+
+.gg-shop {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 26px 24px 40px;
+}
+
+.gg-shop, .gg-shop * {
+    box-sizing: border-box;
+}
+
+
+/* ===== BANNER / TOLDO ===== */
+
+.gg-hero {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--gg-green-700);
+    box-shadow: 0 8px 26px rgba(20, 86, 43, .22);
+}
+
+.gg-hero__awning {
+    height: 46px;
+    background: repeating-linear-gradient(90deg, var(--gg-green-600) 0 40px, var(--gg-cream-light) 40px 80px);
+}
+
+/* Borda ondulada do toldo: um círculo creme por "onda", repetido no eixo x.
+   O -1px cobre a costura entre as duas faixas em telas com zoom fracionário. */
+.gg-hero__scallop {
+    height: 16px;
+    margin-top: -1px;
+    background: radial-gradient(circle at 50% 0, var(--gg-cream-light) 0 11px, transparent 12px) 0 0 / 34px 20px repeat-x;
+}
+
+.gg-hero__content {
+    padding: 20px 34px 30px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    justify-content: space-between;
+}
+
+.gg-hero__text {
+    min-width: 240px;
+}
+
+.gg-hero__kicker {
+    font-family: var(--gg-font-hand);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1;
+    color: #a7e0ab;
+}
+
+.gg-hero__title {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.02;
+    letter-spacing: -.5px;
+    color: var(--gg-cream-light);
+    margin-top: 2px;
+}
+
+.gg-hero__stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gg-hero__stat {
+    background: rgba(246, 239, 221, .14);
+    border: 1.5px solid rgba(246, 239, 221, .35);
+    border-radius: 14px;
+    padding: 11px 16px;
+    color: var(--gg-cream-light);
+    font-family: var(--gg-font-display);
+}
+
+.gg-hero__stat strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.gg-hero__stat span {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: .85;
+}
+
+
+/* ===== BARRA DE FILTROS ===== */
+
+.gg-toolbar {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.gg-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* No mock são <button> de estado local; aqui cada categoria é um link que
+   recarrega a vitrine filtrada (?category=), então o "selecionado" vem do
+   aria-current que o template já marcava — é o mesmo sinal pro leitor de
+   tela e pro CSS, sem classe extra. */
+.gg-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border: 2px solid var(--gg-green-950);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--gg-green-950);
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .15s;
+}
+
+.gg-chip:hover {
+    background: var(--gg-cream-light);
+}
+
+.gg-chip[aria-current="page"] {
+    background: var(--gg-green-950);
+    color: var(--gg-cream-light);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, .18);
+}
+
+.gg-toolbar__count {
+    margin-left: auto;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 14px;
+    color: #7a6a45;
+}
+
+
+/* ===== GRADE ===== */
+
+.gg-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    gap: 28px;
+}
+
+.gg-empty {
+    padding: 60px 20px;
+    text-align: center;
+    font-family: var(--gg-font-display);
+    color: #8a7a55;
+}
+
+.gg-empty__icon {
+    font-size: 44px;
+}
+
+.gg-empty__title {
+    font-size: 20px;
+    margin-top: 8px;
+}
+
+.gg-empty__sub {
+    margin-top: 4px;
+    font-family: var(--gg-font-body);
+    font-weight: 600;
+    font-size: 14px;
+    color: #a08f66;
+}
+
+
+/* ===== CARD (caixote) ===== */
+
+.gg-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: 1px solid rgba(120, 78, 34, .35);
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(#d9a866, #c69350);
+    box-shadow: 0 10px 22px rgba(80, 52, 20, .18), inset 0 1px 0 rgba(255, 255, 255, .25);
+
+    /* Cor da categoria (bolinha da etiqueta) e do estoque. Sobrescritas pelos
+       modificadores logo abaixo — o card nunca lê categoria/estoque direto. */
+    --gg-accent: #8a7a55;
+    --gg-stock-dot: var(--gg-green-500);
+    --gg-stock-text: #3d7a3f;
+}
+
+/* Uma cor por categoria, todas tiradas da paleta do mock (lá o acento era
+   por produto; aqui não existe essa coluna, e a categoria é o agrupamento
+   que o banco tem). Os ids batem com ProductsController::CATEGORIAS. */
+.gg-card--cat-1 { --gg-accent: #e05b49; }
+.gg-card--cat-2 { --gg-accent: #e8873b; }
+.gg-card--cat-3 { --gg-accent: #4c9e46; }
+
+.gg-card--low {
+    --gg-stock-dot: #e8873b;
+    --gg-stock-text: #a0632a;
+}
+
+.gg-card--out {
+    --gg-stock-dot: #c0392b;
+    --gg-stock-text: #a5442f;
+}
+
+.gg-card__awning {
+    height: 20px;
+    background: repeating-linear-gradient(90deg, var(--gg-green-600) 0 20px, var(--gg-cream-light) 20px 40px);
+}
+
+.gg-card__scallop {
+    height: 9px;
+    background: radial-gradient(circle at 50% 0, var(--gg-cream-light) 0 6px, transparent 7px) 0 0 / 20px 12px repeat-x;
+}
+
+.gg-card__bin {
+    position: relative;
+    padding: 14px 14px 0;
+}
+
+.gg-card__tag {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 7px;
+    border-radius: 999px;
+    background: rgba(246, 239, 221, .92);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .14);
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 11px;
+    color: #3a3220;
+}
+
+.gg-card__tag::before {
+    content: "";
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gg-accent);
+}
+
+/* Recuo escuro do caixote: a sombra interna faz a foto parecer assentada
+   dentro da madeira em vez de colada por cima. */
+.gg-card__recess {
+    padding: 8px;
+    border-radius: 14px;
+    background: linear-gradient(#8a5a28, #a06c33);
+    box-shadow: inset 0 3px 8px rgba(50, 28, 8, .55);
+}
+
+.gg-card__photo {
+    display: block;
+    width: 100%;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: rgba(0, 0, 0, .04);
+}
+
+/* Produto sem imagem cadastrada. Mantém a mesma caixa de 150px do <image-slot>
+   do mock (moldura tracejada + ícone) pra grade não desalinhar quando só
+   alguns produtos têm foto. */
+.gg-card__photo--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px dashed rgba(0, 0, 0, .25);
+    color: rgba(0, 0, 0, .45);
+}
+
+
+/* ===== CARD: informações ===== */
+
+.gg-card__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px 16px;
+}
+
+.gg-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.gg-card__name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1;
+    color: #3a2c14;
+}
+
+/* Etiqueta de lousa: o preço escrito a giz na plaquinha preta da feira. */
+.gg-card__price {
+    flex: none;
+    padding: 2px 11px;
+    border: 2px solid #4a453d;
+    border-radius: 8px;
+    background: #2b2824;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .25);
+    font-family: var(--gg-font-hand);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1.1;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.gg-card__stock {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--gg-stock-text);
+}
+
+.gg-card__stock::before {
+    content: "";
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gg-stock-dot);
+}
+
+/* margin-top:auto cola a ação no rodapé do card: numa mesma linha da grade
+   os cards têm alturas diferentes (nome em uma ou duas linhas), e sem isto
+   os botões ficariam desalinhados. */
+.gg-card__action {
+    margin-top: auto;
+    padding-top: 13px;
+}
+
+.gg-card__add,
+.gg-card__sold {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.gg-card__add {
+    background: var(--gg-green-500);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #237a32;
+    transition: all .15s;
+}
+
+.gg-card__add:hover {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+}
+
+.gg-card__sold {
+    background: #b7a980;
+    color: #efe6cf;
+    cursor: not-allowed;
+}
