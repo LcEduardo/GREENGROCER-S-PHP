@@ -1,0 +1,130 @@
+/* Lista de produtos do admin — importado do Claude Design
+   (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html,
+   view `isProductsView`).
+
+   Uma linha por produto: cartão branco baixo, quadradinho colorido da
+   categoria na ponta, nome, e os números alinhados à direita.
+
+   Diferença do mock: lá cada campo da linha é um <input> que salva na hora.
+   Aqui a edição já tem tela própria (/admin/products/edit), então a linha
+   mostra os mesmos valores nos mesmos lugares, em texto, e termina num
+   botão "Editar" — mesmo desenho, sem inventar um fluxo de edição em linha
+   que o servidor não atende.
+
+   Usa .gg-page__* e .gg-btn de forms.css, que precisa vir antes deste
+   <link> no <head>. */
+
+.gg-admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gg-admin-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(80, 52, 20, .1);
+
+    --gg-accent: #8a7a55;
+}
+
+/* Mesmo acento por categoria da vitrine — os tokens moram no :root de
+   style.css justamente pra card e linha não guardarem dois hex diferentes
+   pra mesma categoria. */
+.gg-admin-row--cat-1 { --gg-accent: var(--gg-cat-1); }
+.gg-admin-row--cat-2 { --gg-accent: var(--gg-cat-2); }
+.gg-admin-row--cat-3 { --gg-accent: var(--gg-cat-3); }
+
+/* Produto inativo não aparece na vitrine; na lista ele continua, apagado,
+   porque o admin precisa achá-lo justamente pra reativar. */
+.gg-admin-row--inactive {
+    opacity: .62;
+}
+
+.gg-admin-row__accent {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--gg-accent);
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .12);
+}
+
+.gg-admin-row__name {
+    flex: 1;
+    min-width: 120px;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 17px;
+    color: #3a2c14;
+}
+
+.gg-admin-row__pill {
+    flex: none;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--gg-cream);
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+    color: #8a7a55;
+}
+
+.gg-admin-row__field {
+    flex: none;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.gg-admin-row__value {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: #3a2c14;
+}
+
+/* Preço em verde, como no mock — é o número que o admin varre a lista
+   procurando. */
+.gg-admin-row__value--price {
+    color: var(--gg-green-700);
+}
+
+.gg-admin-row__unit {
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+    color: #a08f66;
+}
+
+.gg-admin-row__status {
+    flex: none;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.gg-admin-row__status--on {
+    background: #e4f3e2;
+    color: #2c6b32;
+}
+
+.gg-admin-row__status--off {
+    background: #f0e6d2;
+    color: #8a7a55;
+}
+
+.gg-admin-empty {
+    padding: 40px;
+    text-align: center;
+    font-family: var(--gg-font-display);
+    font-size: 16px;
+    color: #a08f66;
+}

@@ -1,0 +1,255 @@
+/* Telas de formulário — importado do Claude Design
+   (projeto "Greengrocer product showcase", Greengrocer Shop.dc.html).
+
+   O mock não tem tela de login, cadastro nem formulário de produto. Tem, na
+   view `isPurchasesView`, um formulário: cartão branco arredondado, rótulo
+   miúdo em maiúscula fina por cima do campo, campo de borda creme e botão
+   verde com a sombra dura embaixo. É essa a linguagem que este arquivo
+   extrai e reaplica — nada foi inventado por fora dela.
+
+   Serve /login, /register, /admin/products/create e /admin/products/edit.
+   O cabeçalho de página (.gg-page__*) vem da view `isProductsView`.
+
+   Depende dos tokens (:root) definidos em style.css, que precisa vir antes
+   deste <link> no <head>. */
+
+
+/* ===== PÁGINA ===== */
+
+/* 1000px, e não os 1200px da vitrine: no mock a vitrine é uma grade larga e
+   as telas internas são uma coluna só de leitura. */
+.gg-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 24px 50px;
+}
+
+.gg-page, .gg-page * {
+    box-sizing: border-box;
+}
+
+.gg-page__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.gg-page__title {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 30px;
+    color: var(--gg-green-950);
+    margin-bottom: 4px;
+}
+
+.gg-page__sub {
+    font-family: var(--gg-font-body);
+    font-weight: 600;
+    color: #7a6a45;
+}
+
+
+/* ===== CARTÃO DE FORMULÁRIO ===== */
+
+.gg-card-form {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 3px 10px rgba(80, 52, 20, .1);
+}
+
+/* Login e cadastro: coluna estreita e centralizada, com mais respiro que o
+   formulário do admin — são três campos numa página vazia, não um painel. */
+.gg-auth {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.gg-auth .gg-card-form {
+    padding: 22px;
+}
+
+/* O .gg-page__head é flex (título à esquerda, botão à direita) — aqui não há
+   botão, e um filho flex só ocupa a largura do próprio texto, então o
+   text-align abaixo não teria o que centralizar. Voltar pra block resolve. */
+.gg-auth .gg-page__head {
+    display: block;
+}
+
+.gg-auth .gg-page__title,
+.gg-auth .gg-page__sub {
+    text-align: center;
+}
+
+/* Campos lado a lado quando cabem (preço, unidade, estoque), empilhados
+   quando não — o mock põe os três numa linha só. */
+.gg-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+}
+
+.gg-form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Campo que ocupa a linha inteira mesmo na grade (nome, imagem). */
+.gg-field--wide {
+    grid-column: 1 / -1;
+}
+
+.gg-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+
+/* ===== CAMPOS ===== */
+
+.gg-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.gg-field__label {
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+    color: #8a7a55;
+    margin-bottom: 5px;
+}
+
+.gg-input,
+.gg-select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #e6d8b4;
+    border-radius: 8px;
+    background: #fff;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: #3a2c14;
+}
+
+/* O contorno padrão do navegador sumiria contra a borda creme; o anel verde
+   marca o foco sem sair da paleta. Nunca remover sem pôr outro no lugar. */
+.gg-input:focus,
+.gg-select:focus {
+    outline: none;
+    border-color: var(--gg-green-500);
+    box-shadow: 0 0 0 3px rgba(63, 163, 77, .18);
+}
+
+.gg-check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: #3a2c14;
+    cursor: pointer;
+}
+
+.gg-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gg-green-500);
+    cursor: pointer;
+}
+
+
+/* ===== BOTÕES ===== */
+
+.gg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition: filter .15s, background .15s;
+}
+
+.gg-btn--primary {
+    background: var(--gg-green-500);
+    color: #fff;
+    box-shadow: 0 3px 0 #237a32;
+}
+
+.gg-btn--primary:hover {
+    filter: brightness(1.07);
+}
+
+.gg-btn--ghost {
+    background: #fff;
+    color: var(--gg-green-950);
+    border: 2px solid var(--gg-green-950);
+}
+
+.gg-btn--ghost:hover {
+    background: var(--gg-cream-light);
+}
+
+.gg-btn--sm {
+    padding: 8px 14px;
+    font-size: 14px;
+}
+
+.gg-btn--block {
+    width: 100%;
+}
+
+
+/* ===== MENSAGENS E RODAPÉ DO FORMULÁRIO ===== */
+
+/* O mock não tem estado de erro. Montado com o vermelho que ele já usa na
+   badge do carrinho (--gg-red), no mesmo formato de cartão das outras
+   caixas — em vez de trazer um vermelho de fora da paleta. */
+.gg-alert {
+    padding: 10px 14px;
+    border: 1.5px solid var(--gg-red);
+    border-radius: 10px;
+    background: #fdece9;
+    color: #a5301f;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.gg-form-links {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.gg-form-links a {
+    color: var(--gg-green-700);
+    text-decoration: none;
+}
+
+.gg-form-links a:hover {
+    text-decoration: underline;
+}

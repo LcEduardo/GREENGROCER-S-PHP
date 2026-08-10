@@ -1,22 +1,39 @@
-<h1><?= htmlspecialchars($title) ?></h1>
+<div class="gg-page">
+    <div class="gg-auth">
 
-<?php if (!empty($error)): ?>
-    <p><?= htmlspecialchars($error) ?></p>
-<?php endif; ?>
+        <div class="gg-page__head">
+            <div>
+                <h1 class="gg-page__title"><?= htmlspecialchars($title) ?></h1>
+                <p class="gg-page__sub">Entre pra montar seu carrinho.</p>
+            </div>
+        </div>
 
-<form method="post" action="/login">
-    <label>
-        E-mail
-        <input type="email" name="email" required>
-    </label>
+        <?php if (!empty($error)): ?>
+            <p class="gg-alert" role="alert"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
 
-    <label>
-        Senha
-        <input type="password" name="password" required>
-    </label>
+        <form class="gg-card-form" method="post" action="/login">
+            <div class="gg-form-stack">
+                <div class="gg-field">
+                    <label class="gg-field__label" for="email">E-mail</label>
+                    <input class="gg-input" type="email" id="email" name="email" required>
+                </div>
 
-    <button type="submit">Entrar</button>
-</form>
+                <div class="gg-field">
+                    <label class="gg-field__label" for="password">Senha</label>
+                    <input class="gg-input" type="password" id="password" name="password" required>
+                </div>
+            </div>
 
-<a href="/register">Criar conta</a>
-<a href="/">Voltar</a>
+            <div class="gg-form-actions">
+                <button class="gg-btn gg-btn--primary gg-btn--block" type="submit">Entrar</button>
+            </div>
+        </form>
+
+        <p class="gg-form-links">
+            <a href="/register">Criar conta</a>
+            <a href="/">Voltar pra vitrine</a>
+        </p>
+
+    </div>
+</div>

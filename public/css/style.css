@@ -52,6 +52,15 @@ body {
     --gg-tan-border: #d8cba7;
     --gg-ink: #2a2a25;
 
+    /* Acento por categoria. No mock a cor era por produto; aqui não existe
+       essa coluna, e a categoria é o agrupamento que o banco tem. Os ids
+       batem com ProductsController::CATEGORIAS. Ficam no :root porque a
+       vitrine (bolinha do card) e o admin (quadradinho da linha) precisam
+       chegar no mesmo hex. */
+    --gg-cat-1: #e05b49;
+    --gg-cat-2: #e8873b;
+    --gg-cat-3: #4c9e46;
+
     --gg-font-display: 'Fredoka', sans-serif;
     --gg-font-body: 'Nunito', sans-serif;
     /* Manuscrita — só o que no mock é "escrito à mão": a chamada do banner e

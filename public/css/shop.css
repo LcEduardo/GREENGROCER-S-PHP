@@ -212,12 +212,11 @@
     --gg-stock-text: #3d7a3f;
 }
 
-/* Uma cor por categoria, todas tiradas da paleta do mock (lá o acento era
-   por produto; aqui não existe essa coluna, e a categoria é o agrupamento
-   que o banco tem). Os ids batem com ProductsController::CATEGORIAS. */
-.gg-card--cat-1 { --gg-accent: #e05b49; }
-.gg-card--cat-2 { --gg-accent: #e8873b; }
-.gg-card--cat-3 { --gg-accent: #4c9e46; }
+/* Uma cor por categoria — os hex moram no :root de style.css, porque a
+   linha da lista do admin usa os mesmos (ver admin.css). */
+.gg-card--cat-1 { --gg-accent: var(--gg-cat-1); }
+.gg-card--cat-2 { --gg-accent: var(--gg-cat-2); }
+.gg-card--cat-3 { --gg-accent: var(--gg-cat-3); }
 
 .gg-card--low {
     --gg-stock-dot: #e8873b;

@@ -1,22 +1,43 @@
-<h1><?= htmlspecialchars($title) ?></h1>
+<div class="gg-page">
+    <div class="gg-auth">
 
-<form method="post" action="/register">
-    <label>
-        Nome
-        <input type="text" name="name" required>
-    </label>
+        <div class="gg-page__head">
+            <div>
+                <h1 class="gg-page__title"><?= htmlspecialchars($title) ?></h1>
+                <p class="gg-page__sub">Leva um minuto — nome, e-mail e senha.</p>
+            </div>
+        </div>
 
-    <label>
-        E-mail
-        <input type="email" name="email" required>
-    </label>
+        <!-- Sem bloco de erro: UsersController::store() não tem caminho de
+             falha hoje (nem e-mail repetido) — sempre grava e redireciona.
+             Quando tiver, é copiar o .gg-alert de Sessions/create.php. -->
+        <form class="gg-card-form" method="post" action="/register">
+            <div class="gg-form-stack">
+                <div class="gg-field">
+                    <label class="gg-field__label" for="name">Nome</label>
+                    <input class="gg-input" type="text" id="name" name="name" required>
+                </div>
 
-    <label>
-        Senha
-        <input type="password" name="password" required>
-    </label>
+                <div class="gg-field">
+                    <label class="gg-field__label" for="email">E-mail</label>
+                    <input class="gg-input" type="email" id="email" name="email" required>
+                </div>
 
-    <button type="submit">Cadastrar</button>
-</form>
+                <div class="gg-field">
+                    <label class="gg-field__label" for="password">Senha</label>
+                    <input class="gg-input" type="password" id="password" name="password" required>
+                </div>
+            </div>
 
-<a href="/">Voltar</a>
+            <div class="gg-form-actions">
+                <button class="gg-btn gg-btn--primary gg-btn--block" type="submit">Cadastrar</button>
+            </div>
+        </form>
+
+        <p class="gg-form-links">
+            <a href="/login">Já tenho conta</a>
+            <a href="/">Voltar pra vitrine</a>
+        </p>
+
+    </div>
+</div>

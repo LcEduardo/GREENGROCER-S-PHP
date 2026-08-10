@@ -35,6 +35,8 @@ if ($carrinhoLogado) {
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="/css/cart-panel.css">
     <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
     <header class="gg-header">
