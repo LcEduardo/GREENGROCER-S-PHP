@@ -15,6 +15,15 @@ namespace User\Greengrocers\Model;
  */
 class Product
 {
+    /**
+     * Onde as fotos moram dentro de public/ — o que o navegador pede.
+     *
+     * Público porque o disco tem que apontar para cá: o upload no
+     * ProductsController deriva a pasta real desta constante, e assim a URL e o
+     * destino do arquivo não podem se separar.
+     */
+    public const CAMINHO_PUBLICO = '/images/products/';
+
     public function __construct(
         public readonly int $id,
         public readonly string $name,
@@ -46,6 +55,30 @@ class Product
     public function formattedPrice(): string
     {
         return 'R$ ' . number_format((float) $this->salePrice, 2, ',', '.');
+    }
+
+    /**
+     * A URL da foto, pronta para o `src` — ou null, e aí a tela desenha a
+     * moldura vazia do mock.
+     *
+     * A coluna guarda só o NOME do arquivo (`a3f9….webp`); o caminho é montado
+     * aqui, pelo mesmo motivo do formattedPrice(): mudar a pasta amanhã é mexer
+     * numa linha, não num UPDATE em toda a tabela.
+     */
+    public function imageUrl(): ?string
+    {
+        if ($this->image === null || $this->image === '') {
+            return null;
+        }
+
+        // Enquanto a imagem foi um <input type="text">, dava pra colar a URL de
+        // um site qualquer — e há linhas assim no banco. Prefixar a pasta numa
+        // URL inteira quebraria a foto desses cadastros.
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
+            return $this->image;
+        }
+
+        return self::CAMINHO_PUBLICO . $this->image;
     }
 
     /**

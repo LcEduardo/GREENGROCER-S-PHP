@@ -76,8 +76,8 @@ $limiteEstoqueBaixo = 3.0;
                     <div class="gg-card__bin">
                         <span class="gg-card__tag"><?= htmlspecialchars(mb_strtoupper($categorias[$produto->categoryId] ?? 'Sem categoria')) ?></span>
                         <div class="gg-card__recess">
-                            <?php if ($produto->image !== null && $produto->image !== ''): ?>
-                                <img class="gg-card__photo" src="<?= htmlspecialchars($produto->image) ?>" alt="<?= htmlspecialchars($produto->name) ?>">
+                            <?php if ($produto->imageUrl() !== null): ?>
+                                <img class="gg-card__photo" src="<?= htmlspecialchars($produto->imageUrl()) ?>" alt="<?= htmlspecialchars($produto->name) ?>" loading="lazy">
                             <?php else: ?>
                                 <!-- Sem foto: o mock usa o estado vazio do <image-slot> (moldura
                                      tracejada + ícone). Aqui é decorativo — o nome do produto já
