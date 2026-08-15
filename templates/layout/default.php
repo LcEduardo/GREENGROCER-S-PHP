@@ -37,6 +37,7 @@ if ($carrinhoLogado) {
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/purchases.css">
 </head>
 <body>
     <header class="gg-header">
@@ -58,6 +59,7 @@ if ($carrinhoLogado) {
             <nav class="gg-nav">
                 <?php if (\User\Greengrocers\Auth\Guard::isAdmin()): ?>
                     <a href="/admin/products">Products</a>
+                    <a href="/admin/purchases">Compras</a>
                 <?php endif; ?>
                 <?php if (\User\Greengrocers\Auth\Guard::isLoggedIn()): ?>
                     <a href="/logout">Sair</a>

@@ -1,0 +1,175 @@
+/* Pedido de compra — lista e formulário.
+
+   Nada de paleta nova: a lista reaproveita o .gg-admin-row de admin.css (mesmo
+   cartão branco baixo, mesmas pílulas e mesmo status) e o formulário vive
+   dentro do .gg-card-form de forms.css. O que este arquivo acrescenta é só o
+   que não existia em nenhuma tela até aqui: a linha de ITEM, que é um
+   formulário dentro do formulário.
+
+   Depende dos tokens (:root) de style.css e das classes de forms.css e
+   admin.css, que precisam vir antes deste <link> no <head>. */
+
+
+/* ===== LISTA DE PEDIDOS ===== */
+
+/* O número do pedido é o que o admin usa para conversar sobre ele ("o 12 já
+   entrou?") — por isso vem primeiro, monoespaçado, antes do fornecedor. */
+.gg-purchase-row__id {
+    flex: none;
+    min-width: 46px;
+    font-family: var(--gg-font-display);
+    font-weight: 700;
+    font-size: 15px;
+    color: #a08f66;
+}
+
+/* Finalizado é histórico: continua legível, mas para de disputar atenção com
+   os pedidos que ainda pedem alguma ação. Mesma ideia do produto inativo. */
+.gg-purchase-row--done {
+    opacity: .72;
+}
+
+
+/* ===== BLOCO DE ITENS ===== */
+
+.gg-items {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #efe3c6;
+}
+
+.gg-items__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.gg-items__title {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--gg-green-950);
+}
+
+.gg-items__empty {
+    padding: 22px;
+    border: 1.5px dashed var(--gg-tan-border);
+    border-radius: 12px;
+    text-align: center;
+    font-family: var(--gg-font-body);
+    font-weight: 600;
+    font-size: 14px;
+    color: #a08f66;
+}
+
+.gg-items__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #efe3c6;
+}
+
+.gg-items__total-label {
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: #8a7a55;
+}
+
+.gg-items__total-value {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--gg-green-700);
+}
+
+
+/* ===== LINHA DE ITEM ===== */
+
+/* Produto ocupa o espaço que sobrar; quantidade e custo têm largura fixa
+   porque são números curtos, e alinhados em coluna eles ficam conferíveis de
+   cima a baixo. */
+.gg-item-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: var(--gg-cream-light);
+}
+
+.gg-item-row__product {
+    flex: 1;
+    min-width: 180px;
+}
+
+.gg-item-row .gg-field {
+    width: 120px;
+}
+
+.gg-item-row .gg-item-row__product {
+    width: auto;
+}
+
+.gg-item-row__subtotal {
+    align-items: flex-start;
+}
+
+.gg-item-row__total {
+    padding: 9px 0;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--gg-green-700);
+}
+
+.gg-item-row__remove {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #e6d8b4;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 14px;
+    line-height: 1;
+    color: #a08f66;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.gg-item-row__remove:hover {
+    border-color: var(--gg-red);
+    background: #fdece9;
+    color: #a5301f;
+}
+
+/* Pedido finalizado: os campos ficam na tela como registro do que foi
+   lançado, mas nada mais é clicável — e o cinza padrão do navegador diria
+   isso com uma cor que não é daqui. */
+.gg-item-row [disabled] {
+    background: #f3ecd9;
+    color: #7a6a45;
+    cursor: not-allowed;
+}
+
+.gg-item-row__remove[disabled] {
+    display: none;
+}
+
+@media (max-width: 620px) {
+    .gg-item-row .gg-field {
+        width: 100%;
+    }
+
+    .gg-item-row__remove {
+        align-self: flex-end;
+    }
+}

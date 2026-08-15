@@ -206,6 +206,20 @@ Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuá
 ### Users
 Optei por criar usuários administradores na mão. Basicamente, cria um usuário normal pelo cadastro de usuário, e depois altera o campo `admin` para `true` no banco de dados. A tela de cadastro do usuário é por padrão para *clientes*. Inicialmente, só precisa de senha, nome e email. Caso ele vá fazer uma compra ai será solicitado o endereço e o telefone.
 
+### Purchases
+O pedido de compra tem dois estados, e a diferença entre eles é o que a tela toda gira em torno: **em aberto** (`status_id = 0`) ele é uma lista editável, e o estoque não sabe que ele existe; **finalizado** (`status_id = 1`) as entradas já foram lançadas e ele vira documento — não se edita mais.
+
+Optei por **um formulário só** para criar e editar, em vez de endpoints por item (adicionar item, remover item, mudar quantidade). A tela monta a lista no navegador e manda a lista FINAL num POST; o repositório apaga os itens antigos e grava os novos. Assim não existe pedido meio-salvo no servidor enquanto o admin digita, e "adicionar", "remover" e "alterar" são a mesma operação — uma regra de validação só, num lugar só.
+
+Salvar e finalizar são o mesmo POST, separados pelo botão apertado. "Finalizar" grava e lança o estoque na sequência, que é o "finalizar direto, sem salvar antes" pedido no fluxo.
+
+Duas decisões que não estavam no enunciado e vale registrar:
+
+- **Item sem custo não zera o custo do produto.** O custo é opcional justamente para o pedido servir de reajuste de estoque (acerto de contagem, bonificação). Se o zero fosse gravado por cima, um reajuste apagaria o custo real do produto e estragaria a margem de lucro. Com custo informado, ele substitui o anterior — ainda não trabalhamos com custo médio.
+- **Produto repetido no mesmo pedido não é agrupado.** O estoque acaba somando as duas linhas (é o mesmo UPDATE relativo rodando duas vezes) e cada linha vira uma movimentação própria, então a auditoria mostra o pedido como ele foi lançado, lote por lote.
+
+O requisito de atomicidade do `finalize()` está escrito em [Docs/db-structure.md](Docs/db-structure.md#requisitos-técnicos).
+
 ### Cart
 A ideia é que o carrinho não seja uma outra tela, mas sim um modal que fica na parte direita da tela. Onde os intens serão adicionanos pela vitrine. No carrinho teremos as seguintes opções:
 
