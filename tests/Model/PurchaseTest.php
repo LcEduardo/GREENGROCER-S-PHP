@@ -31,14 +31,27 @@ class PurchaseTest extends TestCase
     }
 
     /**
-     * Pedido sem item não é rascunho, é documento vazio: não teria o que
-     * lançar no estoque ao finalizar.
+     * Rascunho vazio é estado LEGÍTIMO: o admin escolhe o fornecedor, salva e
+     * volta depois para montar a lista.
+     *
+     * Quem exige item é o finalize(), porque a regra é do documento e não do
+     * rascunho — é lá que o estoque é lançado, e é lá que o teste mora
+     * (PurchaseRepositoryTest::test_finalize_recusa_pedido_sem_item).
      */
-    public function test_nao_aceita_pedido_sem_item(): void
+    public function test_aceita_pedido_sem_item_enquanto_rascunho(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $pedido = new Purchase(supplierId: 1, userId: 1, items: []);
 
-        new Purchase(supplierId: 1, userId: 1, items: []);
+        $this->assertSame([], $pedido->items);
+        $this->assertFalse($pedido->isFinalizado());
+    }
+
+    public function test_total_de_pedido_sem_item_e_zero(): void
+    {
+        $this->assertSame(
+            0.0,
+            (float) new Purchase(supplierId: 1, userId: 1, items: [])->totalValue(),
+        );
     }
 
     public function test_nasce_aberto(): void

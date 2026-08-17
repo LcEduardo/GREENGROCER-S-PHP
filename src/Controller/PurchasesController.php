@@ -115,6 +115,17 @@ class PurchasesController
                 notes: trim((string) filter_input(INPUT_POST, 'notes')) ?: null,
             );
 
+            // A mesma regra do finalize(), conferida ANTES de gravar. Não é
+            // desconfiança do Repository — lá é onde ela vale de verdade. É que
+            // salvar e finalizar são duas chamadas, e não uma transação: sem
+            // esta trava, "Finalizar" com a lista vazia gravaria o rascunho,
+            // falharia no passo seguinte e redesenharia a tela de CRIAÇÃO. O
+            // rascunho ficaria no banco sem aparecer na tela, e o segundo clique
+            // criaria outro.
+            if ($finalizar && $pedido->items === []) {
+                throw new DomainException('Um pedido sem item não pode ser finalizado.');
+            }
+
             $id = $this->purchases->save($pedido);
 
             if ($finalizar) {

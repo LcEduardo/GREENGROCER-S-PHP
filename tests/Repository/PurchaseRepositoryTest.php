@@ -112,6 +112,20 @@ class PurchaseRepositoryTest extends DatabaseTestCase
         $this->assertGreaterThan(0, $id);
     }
 
+    /**
+     * O rascunho pode nascer vazio — só o fornecedor escolhido. O que ele não
+     * pode é ser FINALIZADO assim.
+     */
+    public function test_save_aceita_pedido_sem_item(): void
+    {
+        $repository = new PurchaseRepository($this->pdo);
+
+        $id = $repository->save($this->pedido([]));
+
+        $this->assertGreaterThan(0, $id);
+        $this->assertSame([], $repository->findById($id)->items);
+    }
+
     public function test_save_persiste_item_com_custo_zerado(): void
     {
         $tomateId = $this->criarProduto('Tomate');
@@ -239,6 +253,27 @@ class PurchaseRepositoryTest extends DatabaseTestCase
         $this->assertSame(3.0, (float) $movimentacoes[0]['quantity']);
         $this->assertSame($cebolaId, (int) $movimentacoes[1]['product_id']);
         $this->assertSame(4.0, (float) $movimentacoes[1]['quantity']);
+    }
+
+    /**
+     * A regra que saiu do construtor do Purchase: um pedido sem item não tem o
+     * que lançar no estoque, então não vira documento. E o teste não olha só a
+     * exceção — olha que o pedido continuou ABERTO, editável, em vez de virar um
+     * documento vazio e intocável.
+     */
+    public function test_finalize_recusa_pedido_sem_item(): void
+    {
+        $repository = new PurchaseRepository($this->pdo);
+        $id = $repository->save($this->pedido([]));
+
+        try {
+            $repository->finalize($id);
+            $this->fail('finalize() deveria recusar um pedido sem item.');
+        } catch (DomainException) {
+        }
+
+        $this->assertFalse($repository->findById($id)->isFinalizado());
+        $this->assertSame(0, $this->totalDeMovimentacoes());
     }
 
     public function test_finalize_recusa_pedido_ja_finalizado(): void

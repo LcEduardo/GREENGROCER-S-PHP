@@ -148,6 +148,14 @@ class PurchaseRepository
                 throw new DomainException('Este pedido já foi finalizado.');
             }
 
+            // A regra que NÃO mora no Purchase: o rascunho pode estar vazio, o
+            // documento não. Finalizar um pedido sem item não lançaria nada no
+            // estoque e ainda o tornaria intocável — um documento vazio e
+            // permanente, que é o pior dos dois mundos.
+            if ($pedido->items === []) {
+                throw new DomainException('Um pedido sem item não pode ser finalizado.');
+            }
+
             $descricao = sprintf(self::DESCRICAO_ENTRADA, $id);
             $agora = new DateTimeImmutable()->format('Y-m-d H:i:s');
 
@@ -296,6 +304,12 @@ class PurchaseRepository
      */
     private function garanteProdutosAtivos(array $items): void
     {
+        // Rascunho vazio não tem produto para conferir — e `IN ()` sem nada
+        // dentro é SQL inválido, não uma consulta que devolve zero linhas.
+        if ($items === []) {
+            return;
+        }
+
         $ids = array_values(array_unique(array_map(
             static fn (PurchaseItem $item) => $item->productId,
             $items,

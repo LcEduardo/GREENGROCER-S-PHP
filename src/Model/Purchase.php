@@ -18,10 +18,15 @@ use InvalidArgumentException;
  *   `stock_movements`. Não se edita mais — reabrir teria que estornar o
  *   estoque, e isso ainda não existe (é feito pelo banco, na mão).
  *
- * O pedido nasce com os itens dentro e nunca sem eles: um pedido sem item não
- * teria o que lançar no estoque, então não é um pedido pela metade — é um
- * documento vazio. Por isso a lista entra no construtor, e não por um addItem()
- * que deixaria o objeto inválido entre uma chamada e outra.
+ * A lista de itens entra pelo CONSTRUTOR, e não por um addItem() que deixaria o
+ * objeto meio-montado entre uma chamada e outra: o pedido é sempre trocado por
+ * inteiro, que é exatamente o que a tela faz.
+ *
+ * E ela pode vir VAZIA, de propósito. Enquanto aberto, o pedido é rascunho —
+ * escolher o fornecedor, salvar e montar a lista depois é um jeito legítimo de
+ * trabalhar. "Precisa ter pelo menos um item" é regra do DOCUMENTO, não do
+ * rascunho: quem a aplica é o `finalize()` do Repository, que é quem lança o
+ * estoque e para quem um pedido vazio realmente não teria o que fazer.
  */
 class Purchase
 {
@@ -47,10 +52,6 @@ class Purchase
     ) {
         if ($supplierId === null || $supplierId <= 0) {
             throw new InvalidArgumentException('O pedido de compra precisa de um fornecedor.');
-        }
-
-        if ($items === []) {
-            throw new InvalidArgumentException('O pedido de compra precisa de pelo menos um item.');
         }
 
         foreach ($items as $item) {
