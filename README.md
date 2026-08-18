@@ -197,91 +197,13 @@ Conhece os dados **e as regras que andam junto com eles**. Não é um saco de ca
 
 ---
 
-## O problema N+1
+## Documentação
 
-### O que é
+Explicações mais profundas — o código lido método a método, não só a decisão — ficam fora do README, em [`Docs/Code-Review/`](Docs/Code-Review):
 
-A tela de pedidos de compra (`/admin/purchases`) mostra, para cada pedido, quantos itens ele tem e quanto deu. Os itens estão em outra tabela, então o caminho ingênuo é buscar a lista e, para cada linha dela, buscar os itens:
-
-```php
-$pedidos = /* SELECT ... FROM purchases */;
-
-foreach ($pedidos as $pedido) {
-    // ❌ uma consulta por volta do laço
-    $itens = /* SELECT ... FROM purchase_items WHERE purchase_id = ? */;
-}
-```
-
-É **1 consulta para a lista + N consultas para os itens** — daí o nome. Com 50 pedidos na tela, são 51 idas ao banco.
-
-O que pesa aqui não é o SQL: cada uma dessas consultas é trivial e usa índice. O que pesa é a **ida e volta** até o banco, que se repete linha a linha. E o problema não aparece em desenvolvimento — com 3 pedidos de teste a tela voa. Ele nasce junto com os dados, quando o cliente já está usando.
-
-| Pedidos na tela | Ingênuo | Como está no projeto |
-|---|---|---|
-| 1 | 2 consultas | 2 consultas |
-| 50 | 51 consultas | 2 consultas |
-| 500 | 501 consultas | 2 consultas |
-
-### Como o projeto resolve
-
-Em `src/Repository/PurchaseRepository.php`, em três passos: colher os ids, buscar tudo de uma vez, distribuir em memória.
-
-**1. Colher os ids da primeira consulta**
-
-```php
-$itensPorPedido = $this->findItemsGroupedByPurchase(
-    array_map(static fn (array $linha) => (int) $linha['id'], $linhas),
-);
-```
-
-O `array_map` transforma a lista de **linhas do banco** numa lista de **ids** — `[7, 6, 5]` —, que é o formato que a segunda consulta precisa.
-
-**2. Uma consulta só, com `IN (...)`**
-
-```php
-$placeholders = implode(', ', array_fill(0, count($purchaseIds), '?'));
-
-$statement = $this->pdo->prepare(
-    'SELECT id, purchase_id, product_id, quantity, cost_value'
-    . " FROM purchase_items WHERE purchase_id IN ({$placeholders})"
-    . ' ORDER BY id'
-);
-$statement->execute($purchaseIds);
-```
-
-**3. Agrupar em memória, por `purchase_id`**
-
-```php
-foreach ($statement as $row) {
-    $porPedido[(int) $row['purchase_id']][] = new PurchaseItem(/* ... */);
-}
-```
-
-O resultado é um mapa `[7 => [item, item], 6 => [item]]`. A partir daí, montar cada pedido é uma busca em array — nenhuma ida a mais ao banco:
-
-```php
-$this->hydrate($linha, $itensPorPedido[(int) $linha['id']] ?? [])
-```
-
-O `?? []` cobre o pedido que não tem item nenhum: como o mapa é montado por acréscimo, a chave simplesmente não existe para ele.
-
-### Por que agrupar em memória e não um JOIN
-
-Um `purchases LEFT JOIN purchase_items` também resolveria em uma consulta, mas traria as colunas do pedido **repetidas a cada item** — um pedido de 8 itens vira 8 linhas com fornecedor, data e status iguais. Aí a hidratação teria que desduplicar isso na mão, decidindo quando uma linha nova é um pedido novo e quando é só mais um item do anterior.
-
-Duas consultas simples, cada uma devolvendo exatamente uma tabela, saem mais baratas de ler e de manter. O ganho de 501 → 2 já está tomado; espremer 2 → 1 não vale o código.
-
-### Detalhes que mordem
-
-> ⚠️ **`IN ()` vazio é SQL inválido.** Por isso existem dois guards: um antes de chamar (`if ($linhas === [])`) e outro dentro do método (`if ($purchaseIds === [])`). Não é redundância — o método também é chamado pelo `findById()`, por outro caminho.
-
-> ⚠️ **Os placeholders são gerados, os valores nunca.** O `array_fill` monta `?, ?, ?` e os ids vão pelo `execute()`. Interpolar os ids direto na string seria a porta de entrada clássica de SQL injection — mesmo "sendo só números", que é exatamente o que todo mundo pensa antes do incidente.
-
-> ⚠️ **O `(int)` não é decoração.** Os ids viram chave de array de um lado (`$itensPorPedido[...]`) e são lidos do outro (`(int) $row['purchase_id']`). Os dois lados precisam ser do mesmo tipo, ou a busca não casa — e o PDO devolve tudo como string por padrão.
-
-### Como identificar em outro lugar
-
-A regra prática: **consulta dentro de um laço que percorre o resultado de outra consulta**. Se o número de consultas de uma tela depende de quantas linhas ela mostra, é N+1 — e a correção é sempre a mesma forma: colher as chaves, uma consulta com `IN (...)`, agrupar em memória.
+- [`auth.md`](Docs/Code-Review/auth.md) — sessão, `Guard`, login, logout e cadastro.
+- [`purchases-controller.md`](Docs/Code-Review/purchases-controller.md) — o fluxo do pedido de compra: o problema N+1 da listagem (e como foi resolvido) e os métodos `create()`/`store()`/`edit()`/`update()`.
+- [`db-structure.md`](Docs/Code-Review/db-structure.md) — o schema do banco, tabela a tabela.
 
 ---
 
@@ -310,7 +232,7 @@ Duas decisões que não estavam no enunciado e vale registrar:
 - **Item sem custo não zera o custo do produto.** O custo é opcional justamente para o pedido servir de reajuste de estoque (acerto de contagem, bonificação). Se o zero fosse gravado por cima, um reajuste apagaria o custo real do produto e estragaria a margem de lucro. Com custo informado, ele substitui o anterior — ainda não trabalhamos com custo médio.
 - **Produto repetido no mesmo pedido não é agrupado.** O estoque acaba somando as duas linhas (é o mesmo UPDATE relativo rodando duas vezes) e cada linha vira uma movimentação própria, então a auditoria mostra o pedido como ele foi lançado, lote por lote.
 
-O requisito de atomicidade do `finalize()` está escrito em [Docs/db-structure.md](Docs/db-structure.md#requisitos-técnicos).
+O requisito de atomicidade do `finalize()` está escrito em [Docs/Code-Review/db-structure.md](Docs/Code-Review/db-structure.md#requisitos-técnicos).
 
 ### Cart
 A ideia é que o carrinho não seja uma outra tela, mas sim um modal que fica na parte direita da tela. Onde os intens serão adicionanos pela vitrine. No carrinho teremos as seguintes opções:
