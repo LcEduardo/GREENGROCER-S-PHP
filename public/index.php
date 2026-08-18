@@ -7,10 +7,13 @@ require __DIR__ . '/../vendor/autoload.php';
 use User\Greengrocers\Auth\Guard;
 use User\Greengrocers\Controller\CartController;
 use User\Greengrocers\Controller\ProductsController;
+use User\Greengrocers\Controller\PurchasesController;
 use User\Greengrocers\Controller\SessionsController;
 use User\Greengrocers\Controller\UsersController;
 use User\Greengrocers\Repository\CartRepository;
 use User\Greengrocers\Repository\ProductRepository;
+use User\Greengrocers\Repository\PurchaseRepository;
+use User\Greengrocers\Repository\SupplierRepository;
 use User\Greengrocers\Repository\UserRepository;
 use User\Greengrocers\Database\Connection;
 // Roteamento simples baseado no caminho da URL
@@ -24,6 +27,20 @@ session_start();
 function isAjax(): bool
 {
     return ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'fetch';
+}
+
+/**
+ * O pedido de compra junta três repositórios (pedidos, fornecedores e
+ * produtos) e tem cinco rotas — montá-lo à mão em cada `case` repetiria as
+ * mesmas quatro linhas cinco vezes.
+ */
+function purchasesController(): PurchasesController
+{
+    return new PurchasesController(
+        new PurchaseRepository(Connection::get()),
+        new SupplierRepository(Connection::get()),
+        new ProductRepository(Connection::get()),
+    );
 }
 
 switch ($path) {
@@ -71,6 +88,45 @@ switch ($path) {
             $controller->store();
         } else {
             $controller->create();
+        }
+        break;
+
+    case '/admin/purchases':
+        if (!Guard::isAdmin()) {
+            header('Location: ' . (Guard::isLoggedIn() ? '/' : '/login'));
+            break;
+        }
+
+        purchasesController()->index();
+        break;
+
+    case '/admin/purchases/create':
+        if (!Guard::isAdmin()) {
+            header('Location: ' . (Guard::isLoggedIn() ? '/' : '/login'));
+            break;
+        }
+
+        $controller = purchasesController();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $controller->store();
+        } else {
+            $controller->create();
+        }
+        break;
+
+    case '/admin/purchases/edit':
+        if (!Guard::isAdmin()) {
+            header('Location: ' . (Guard::isLoggedIn() ? '/' : '/login'));
+            break;
+        }
+
+        $controller = purchasesController();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $controller->update();
+        } else {
+            $controller->edit();
         }
         break;
 

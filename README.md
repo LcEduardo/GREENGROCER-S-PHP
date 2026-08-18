@@ -197,6 +197,94 @@ Conhece os dados **e as regras que andam junto com eles**. Não é um saco de ca
 
 ---
 
+## O problema N+1
+
+### O que é
+
+A tela de pedidos de compra (`/admin/purchases`) mostra, para cada pedido, quantos itens ele tem e quanto deu. Os itens estão em outra tabela, então o caminho ingênuo é buscar a lista e, para cada linha dela, buscar os itens:
+
+```php
+$pedidos = /* SELECT ... FROM purchases */;
+
+foreach ($pedidos as $pedido) {
+    // ❌ uma consulta por volta do laço
+    $itens = /* SELECT ... FROM purchase_items WHERE purchase_id = ? */;
+}
+```
+
+É **1 consulta para a lista + N consultas para os itens** — daí o nome. Com 50 pedidos na tela, são 51 idas ao banco.
+
+O que pesa aqui não é o SQL: cada uma dessas consultas é trivial e usa índice. O que pesa é a **ida e volta** até o banco, que se repete linha a linha. E o problema não aparece em desenvolvimento — com 3 pedidos de teste a tela voa. Ele nasce junto com os dados, quando o cliente já está usando.
+
+| Pedidos na tela | Ingênuo | Como está no projeto |
+|---|---|---|
+| 1 | 2 consultas | 2 consultas |
+| 50 | 51 consultas | 2 consultas |
+| 500 | 501 consultas | 2 consultas |
+
+### Como o projeto resolve
+
+Em `src/Repository/PurchaseRepository.php`, em três passos: colher os ids, buscar tudo de uma vez, distribuir em memória.
+
+**1. Colher os ids da primeira consulta**
+
+```php
+$itensPorPedido = $this->findItemsGroupedByPurchase(
+    array_map(static fn (array $linha) => (int) $linha['id'], $linhas),
+);
+```
+
+O `array_map` transforma a lista de **linhas do banco** numa lista de **ids** — `[7, 6, 5]` —, que é o formato que a segunda consulta precisa.
+
+**2. Uma consulta só, com `IN (...)`**
+
+```php
+$placeholders = implode(', ', array_fill(0, count($purchaseIds), '?'));
+
+$statement = $this->pdo->prepare(
+    'SELECT id, purchase_id, product_id, quantity, cost_value'
+    . " FROM purchase_items WHERE purchase_id IN ({$placeholders})"
+    . ' ORDER BY id'
+);
+$statement->execute($purchaseIds);
+```
+
+**3. Agrupar em memória, por `purchase_id`**
+
+```php
+foreach ($statement as $row) {
+    $porPedido[(int) $row['purchase_id']][] = new PurchaseItem(/* ... */);
+}
+```
+
+O resultado é um mapa `[7 => [item, item], 6 => [item]]`. A partir daí, montar cada pedido é uma busca em array — nenhuma ida a mais ao banco:
+
+```php
+$this->hydrate($linha, $itensPorPedido[(int) $linha['id']] ?? [])
+```
+
+O `?? []` cobre o pedido que não tem item nenhum: como o mapa é montado por acréscimo, a chave simplesmente não existe para ele.
+
+### Por que agrupar em memória e não um JOIN
+
+Um `purchases LEFT JOIN purchase_items` também resolveria em uma consulta, mas traria as colunas do pedido **repetidas a cada item** — um pedido de 8 itens vira 8 linhas com fornecedor, data e status iguais. Aí a hidratação teria que desduplicar isso na mão, decidindo quando uma linha nova é um pedido novo e quando é só mais um item do anterior.
+
+Duas consultas simples, cada uma devolvendo exatamente uma tabela, saem mais baratas de ler e de manter. O ganho de 501 → 2 já está tomado; espremer 2 → 1 não vale o código.
+
+### Detalhes que mordem
+
+> ⚠️ **`IN ()` vazio é SQL inválido.** Por isso existem dois guards: um antes de chamar (`if ($linhas === [])`) e outro dentro do método (`if ($purchaseIds === [])`). Não é redundância — o método também é chamado pelo `findById()`, por outro caminho.
+
+> ⚠️ **Os placeholders são gerados, os valores nunca.** O `array_fill` monta `?, ?, ?` e os ids vão pelo `execute()`. Interpolar os ids direto na string seria a porta de entrada clássica de SQL injection — mesmo "sendo só números", que é exatamente o que todo mundo pensa antes do incidente.
+
+> ⚠️ **O `(int)` não é decoração.** Os ids viram chave de array de um lado (`$itensPorPedido[...]`) e são lidos do outro (`(int) $row['purchase_id']`). Os dois lados precisam ser do mesmo tipo, ou a busca não casa — e o PDO devolve tudo como string por padrão.
+
+### Como identificar em outro lugar
+
+A regra prática: **consulta dentro de um laço que percorre o resultado de outra consulta**. Se o número de consultas de uma tela depende de quantas linhas ela mostra, é N+1 — e a correção é sempre a mesma forma: colher as chaves, uma consulta com `IN (...)`, agrupar em memória.
+
+---
+
 ## Trade-offs
 Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é usada apenas para filtrar produtos. Não se segue uma outra regra de negócio, então não há necessidade de criar uma classe para ela. Caso no futuro seja necessário, e se tiver regras de negócio, que serão chamadas em algum ponto do projeto, então será necessário criar uma classe para ela.
 
@@ -205,6 +293,24 @@ Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuá
 
 ### Users
 Optei por criar usuários administradores na mão. Basicamente, cria um usuário normal pelo cadastro de usuário, e depois altera o campo `admin` para `true` no banco de dados. A tela de cadastro do usuário é por padrão para *clientes*. Inicialmente, só precisa de senha, nome e email. Caso ele vá fazer uma compra ai será solicitado o endereço e o telefone.
+
+### Purchases
+O pedido de compra tem dois estados, e a diferença entre eles é o que a tela toda gira em torno: **em aberto** (`status_id = 0`) ele é uma lista editável, e o estoque não sabe que ele existe; **finalizado** (`status_id = 1`) as entradas já foram lançadas e ele vira documento — não se edita mais.
+
+Optei por **um formulário só** para criar e editar, em vez de endpoints por item (adicionar item, remover item, mudar quantidade). A tela monta a lista no navegador e manda a lista FINAL num POST; o repositório apaga os itens antigos e grava os novos. Assim não existe pedido meio-salvo no servidor enquanto o admin digita, e "adicionar", "remover" e "alterar" são a mesma operação — uma regra de validação só, num lugar só.
+
+Salvar e finalizar são o mesmo POST, separados pelo botão apertado. "Finalizar" grava e lança o estoque na sequência, que é o "finalizar direto, sem salvar antes" pedido no fluxo.
+
+**Rascunho pode ficar vazio; documento não.** O enunciado pede ">= 1 item" para o pedido, e a primeira versão aplicava isso no construtor do `Purchase` — o que impedia salvar um pedido só com o fornecedor escolhido. Mas essa é regra do **documento**, não do rascunho: quem não tem o que fazer com uma lista vazia é o `finalize()`, que lança o estoque. Então a regra desceu para lá, e o pedido aberto pode nascer vazio e ser montado depois.
+
+Isso tem um efeito no Controller que vale conhecer: salvar e finalizar são duas chamadas em sequência, **não uma transação**. Sem uma trava antes do `save()`, clicar em "Finalizar" com a lista vazia gravaria o rascunho, falharia no passo seguinte e redesenharia a tela de criação — o rascunho ficaria no banco sem aparecer na tela, e o segundo clique criaria outro. Por isso a mesma regra é conferida no `PurchasesController::grava()` antes de gravar. Não é desconfiança do Repository: lá é onde ela vale, aqui é o que evita gravar o que o usuário não pediu.
+
+Duas decisões que não estavam no enunciado e vale registrar:
+
+- **Item sem custo não zera o custo do produto.** O custo é opcional justamente para o pedido servir de reajuste de estoque (acerto de contagem, bonificação). Se o zero fosse gravado por cima, um reajuste apagaria o custo real do produto e estragaria a margem de lucro. Com custo informado, ele substitui o anterior — ainda não trabalhamos com custo médio.
+- **Produto repetido no mesmo pedido não é agrupado.** O estoque acaba somando as duas linhas (é o mesmo UPDATE relativo rodando duas vezes) e cada linha vira uma movimentação própria, então a auditoria mostra o pedido como ele foi lançado, lote por lote.
+
+O requisito de atomicidade do `finalize()` está escrito em [Docs/db-structure.md](Docs/db-structure.md#requisitos-técnicos).
 
 ### Cart
 A ideia é que o carrinho não seja uma outra tela, mas sim um modal que fica na parte direita da tela. Onde os intens serão adicionanos pela vitrine. No carrinho teremos as seguintes opções:

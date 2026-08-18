@@ -78,6 +78,9 @@ Compras junto ao fornecedor — a entrada de estoque (`ORDERS` no documento orig
 | purchased_at | DATETIME_IMMUTABLE |
 | total_value | DECIMAL(10,2) |
 | notes | TEXT, opcional |
+| status_id | SMALLINT, CHECK IN (0, 1), default `0` — `0` não finalizado / `1` finalizado |
+
+> ⚠️ `status_id` separa RASCUNHO de DOCUMENTO. Com `0` o pedido é uma lista editável e o estoque não sabe que ele existe; ao virar `1`, as entradas já foram lançadas em `products` e em `stock_movements`, e o pedido não é mais editável. O único caminho para `1` é o `PurchaseRepository::finalize()`, que é quem move o estoque — reabertura ainda não existe (é feita direto no banco).
 
 ---
 
@@ -152,6 +155,7 @@ Livro-caixa de auditoria (`MOVIMENTACOES_ESTOQUE` no documento original) — tod
 | reference_type | VARCHAR(20), CHECK IN (`purchase`, `sale`, `manual_adjustment`) |
 | reference_id | INTEGER, opcional — id de `purchases` ou `sales`, conforme `reference_type`; nulo em ajuste manual |
 | moved_at | DATETIME_IMMUTABLE |
+| description | VARCHAR(255), opcional — a frase pronta da movimentação (ex.: `Entrada de produto pelo pedido 12`) |
 
 > ⚠️ `reference_id` é referência **polimórfica** (aponta para `purchases` ou `sales`) — sem FK física, pois banco relacional não impõe FK condicional. A integridade fica com a camada de aplicação.
 
@@ -175,6 +179,28 @@ Livro-caixa de auditoria (`MOVIMENTACOES_ESTOQUE` no documento original) — tod
 
 ---
 
+## Requisitos técnicos
+
+### Finalizar pedido de compra é atômico
+
+Finalizar um pedido de N itens escreve **2N + 1** vezes: um UPDATE em `products`
+por item (soma no estoque, e o custo quando informado), um INSERT em
+`stock_movements` por item, e o UPDATE do `status_id`.
+
+Isso tem que acontecer **tudo ou nada**. Uma falha na quinta linha de um pedido
+de dez deixaria cinco produtos com estoque somado, o livro de movimentações pela
+metade e o pedido ainda aberto — um estoque errado que ninguém consegue
+reconstruir depois, porque não há como saber onde a escrita parou.
+
+Por isso `PurchaseRepository::finalize()` roda inteiro dentro de uma transação, e
+qualquer exceção derruba o conjunto. O mesmo vale para `save()`, que apaga e
+reinsere os itens: entre o DELETE e o INSERT o pedido fica sem itens, e ninguém
+pode ver esse estado.
+
+---
+
 ## Pontos em aberto
 
 - **Momento da baixa de estoque** — definir se a baixa em `stock_movements`/`products.stock_quantity` ocorre no momento do pedido (`sales`) ou apenas após confirmação manual do pagamento pelo admin. Ainda não resolvido em schema nem em código.
+- **Reabertura de pedido de compra** — hoje o pedido finalizado é definitivo pela aplicação. Reabrir exigiria estornar o estoque e as movimentações; enquanto isso não existe, o acerto é feito direto no banco.
+- **Custo médio** — `finalize()` SUBSTITUI o `cost_price` do produto pelo custo do item. Quando o custo médio entrar, é este ponto que muda.
