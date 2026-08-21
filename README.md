@@ -1,10 +1,9 @@
 ## Goals
+- [ ] Implementar migrations para versionamento do banco de dados. (Leia: [`Docs/Migrations/`](Docs/Migrations/):)
+
 - [ ] Implementar o padrão TDD (Test Driven Development) no projeto.
 - [ ] Implementar o padrão MVC (Model-View-Controller) no projeto.
-- [ ] Implementar o padrão Repository no projeto.
-- [ ] Implementar migrations para versionamento do banco de dados.
-- [ ] Aprender authentication e autorização de usuários.
-- [ ] Aprender sessões e cookies.
+
 
 ## Requisitos
 
@@ -18,7 +17,7 @@
 
 ```bash
 # Clone o repositório do projeto
-git clone url_do_repositorio.git
+git clone https://github.com/LcEduardo/GREENGROCER-S-PHP.git
 
 # Instale as dependências do projeto
 composer install
@@ -35,7 +34,7 @@ composer install --no-dev
 
 ### Configuração da conexão
 
-Copie o `.env.example` para `.env` e ajuste. O `.env` **não vai para o Git** — é onde moram os valores reais.
+Copie o `.env.example` para `.env` e ajuste. O `.env` 
 
 ```bash
 cp .env.example .env
@@ -204,54 +203,31 @@ Explicações mais profundas — o código lido método a método, não só a de
 - [`auth.md`](Docs/Code-Review/auth.md) — sessão, `Guard`, login, logout e cadastro.
 - [`purchases-controller.md`](Docs/Code-Review/purchases-controller.md) — o fluxo do pedido de compra: o problema N+1 da listagem (e como foi resolvido) e os métodos `create()`/`store()`/`edit()`/`update()`.
 - [`db-structure.md`](Docs/Code-Review/db-structure.md) — o schema do banco, tabela a tabela.
+- [`cart.md`](Docs/Code-Review/cart.md) — a implementação do carrinho de compras.
 
 ---
 
-## Trade-offs
+### Trade-offs
 Não escolhi transformar Categoria em um objeto, visto que ela inicialmente é usada apenas para filtrar produtos. Não se segue uma outra regra de negócio, então não há necessidade de criar uma classe para ela. Caso no futuro seja necessário, e se tiver regras de negócio, que serão chamadas em algum ponto do projeto, então será necessário criar uma classe para ela.
 
-### Admin/Products
+#### Admin/Products
 Optei por mostrar os produtos ativos e inativos na mesma tela, visto que o usuário administrador pode querer ver os produtos inativos para reativá-los. Caso o usuário admin queira alterar o status de um produto, ele acessa a tela de edição do produto e altera o status. Nessa tela, ele conseguirá visualizar a movimentação do produto, para poder tomar uma decisão.
 
-### Users
+#### Users
 Optei por criar usuários administradores na mão. Basicamente, cria um usuário normal pelo cadastro de usuário, e depois altera o campo `admin` para `true` no banco de dados. A tela de cadastro do usuário é por padrão para *clientes*. Inicialmente, só precisa de senha, nome e email. Caso ele vá fazer uma compra ai será solicitado o endereço e o telefone.
 
-### Purchases
+#### Purchases
 O pedido de compra tem dois estados, e a diferença entre eles é o que a tela toda gira em torno: **em aberto** (`status_id = 0`) ele é uma lista editável, e o estoque não sabe que ele existe; **finalizado** (`status_id = 1`) as entradas já foram lançadas e ele vira documento — não se edita mais.
 
 Optei por **um formulário só** para criar e editar, em vez de endpoints por item (adicionar item, remover item, mudar quantidade). A tela monta a lista no navegador e manda a lista FINAL num POST; o repositório apaga os itens antigos e grava os novos. Assim não existe pedido meio-salvo no servidor enquanto o admin digita, e "adicionar", "remover" e "alterar" são a mesma operação — uma regra de validação só, num lugar só.
 
-Salvar e finalizar são o mesmo POST, separados pelo botão apertado. "Finalizar" grava e lança o estoque na sequência, que é o "finalizar direto, sem salvar antes" pedido no fluxo.
+Para mais detalhes, a documentação está em [Docs/Code-Review/db-structure.md](Docs/Code-Review/db-structure.md#requisitos-técnicos).
 
-**Rascunho pode ficar vazio; documento não.** O enunciado pede ">= 1 item" para o pedido, e a primeira versão aplicava isso no construtor do `Purchase` — o que impedia salvar um pedido só com o fornecedor escolhido. Mas essa é regra do **documento**, não do rascunho: quem não tem o que fazer com uma lista vazia é o `finalize()`, que lança o estoque. Então a regra desceu para lá, e o pedido aberto pode nascer vazio e ser montado depois.
-
-Isso tem um efeito no Controller que vale conhecer: salvar e finalizar são duas chamadas em sequência, **não uma transação**. Sem uma trava antes do `save()`, clicar em "Finalizar" com a lista vazia gravaria o rascunho, falharia no passo seguinte e redesenharia a tela de criação — o rascunho ficaria no banco sem aparecer na tela, e o segundo clique criaria outro. Por isso a mesma regra é conferida no `PurchasesController::grava()` antes de gravar. Não é desconfiança do Repository: lá é onde ela vale, aqui é o que evita gravar o que o usuário não pediu.
-
-Duas decisões que não estavam no enunciado e vale registrar:
-
-- **Item sem custo não zera o custo do produto.** O custo é opcional justamente para o pedido servir de reajuste de estoque (acerto de contagem, bonificação). Se o zero fosse gravado por cima, um reajuste apagaria o custo real do produto e estragaria a margem de lucro. Com custo informado, ele substitui o anterior — ainda não trabalhamos com custo médio.
-- **Produto repetido no mesmo pedido não é agrupado.** O estoque acaba somando as duas linhas (é o mesmo UPDATE relativo rodando duas vezes) e cada linha vira uma movimentação própria, então a auditoria mostra o pedido como ele foi lançado, lote por lote.
-
-O requisito de atomicidade do `finalize()` está escrito em [Docs/Code-Review/db-structure.md](Docs/Code-Review/db-structure.md#requisitos-técnicos).
-
-### Cart
+#### Cart
 A ideia é que o carrinho não seja uma outra tela, mas sim um modal que fica na parte direita da tela. Onde os intens serão adicionanos pela vitrine. No carrinho teremos as seguintes opções:
 
 - Adicionar item
 - Alterar quantidade do item
 - Checkout (finalizar compra)
 
-O carrinho ficará na nav. Se o usuário adicionar um item é preciso consultar o banco para pegar a quantidade total de intes adicionados no carrionho e exibir esse número na nav. Caso o usuário não esteja logado, ele será redirecionado para a tela de login para adicionar o item no carrinho. Caso ele não tenha cadastro, ele será redirecionado para a tela de cadastro. Na nav também será necessário exibir o valor total do carrinho. 
-
-Dentro do carrinho caro não haja item, deverá ser exibido a mensagem: 
-```
-                🧺
-        Your basket is empty
-Add some fresh produce to get started.
-```
-
-Adicionando o item você verá ele na lista de itens com a quantidade e o preço total do item. Abaixo da lista de itens, será exibido o valor total do carrinho. O botão de checkout será exibido abaixo do valor total do carrinho. Mas só se existir items no carrinho. Caso não haja itens, o botão de checkout não será exibido.
-
-Dentro do carrinho, o usuário poderá alterar a quantidade do item. Caso ele altere a quantidade para 0, o item será removido do carrinho. Caso ele altere a quantidade para um número maior que 0, o valor total do item será atualizado e o valor total do carrinho também será atualizado.
-
-Para evitar que um duplo clique na hora de diminuir a quantidade do item quebre a aplicação, a IA sugeriu verificar se a consulta encontrou o item no carrinho: o `fetch()` do PDO retorna `false` quando não encontra nenhuma linha (não tem relação com o duplo clique em si, é assim que o PDO sinaliza "não achei nada"). Se não encontrou, o método encerra sem fazer nada, evitando o erro de tentar acessar um campo num valor booleano.
+Para mais detalhes, a documentação está em [Docs/Code-Review/cart.md](Docs/Code-Review/cart.md).

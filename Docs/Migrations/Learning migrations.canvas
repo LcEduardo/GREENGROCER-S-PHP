@@ -1,0 +1,32 @@
+{
+	"nodes":[
+		{"id":"3d7d741114e228f0","type":"text","text":"O QUE É?","x":-340,"y":-280,"width":250,"height":50,"color":"4"},
+		{"id":"5e0af58fefe86ec0","type":"text","text":"DOCTRINE","x":-414,"y":-120,"width":250,"height":60,"color":"4"},
+		{"id":"4d92202e7828f77e","type":"text","text":"ALURA","x":-509,"y":65,"width":191,"height":55,"color":"4"},
+		{"id":"7ffb72d85af30ac7","type":"text","text":"DOCUMENTAÇÃO","x":-220,"y":65,"width":250,"height":60,"color":"4"},
+		{"id":"29a12ee702893d52","type":"text","text":"INSTALL","x":-220,"y":340,"width":250,"height":60,"color":"4"},
+		{"id":"c7d386b3732def6c","type":"text","text":"UP/DOWN","x":-220,"y":480,"width":250,"height":60,"color":"4"},
+		{"id":"2613967e2e21c2b3","type":"text","text":"PRÁTICA","x":-220,"y":620,"width":250,"height":60,"color":"4"},
+		{"id":"39f3115023273076","type":"text","text":"REVIEW","x":-538,"y":200,"width":250,"height":60,"color":"4"},
+		{"id":"bd8ed2c2af55fad6","type":"text","text":"GREENGROCERY'S","x":-220,"y":200,"width":250,"height":60,"color":"4"},
+		{"id":"763da54cc3804a8c","type":"file","file":"1.PROJETOS/Relation Database/Migrations/Migrations.md","x":80,"y":-520,"width":400,"height":400,"color":"6"},
+		{"id":"3086a058e25045d7","type":"text","text":"SUBIR LINKDLIN","x":-220,"y":840,"width":250,"height":60,"color":"3"},
+		{"id":"8993c758f1a67a39","type":"file","file":"1.PROJETOS/Relation Database/Migrations/Doctrine Project.md","x":219,"y":-30,"width":400,"height":400,"color":"6"}
+	],
+	"edges":[
+		{"id":"d64faf29d520d9f1","fromNode":"3d7d741114e228f0","fromSide":"right","toNode":"763da54cc3804a8c","toSide":"left"},
+		{"id":"b79018f06ef82516","fromNode":"3d7d741114e228f0","fromSide":"bottom","toNode":"5e0af58fefe86ec0","toSide":"top"},
+		{"id":"0e11c36091585e33","fromNode":"5e0af58fefe86ec0","fromSide":"bottom","toNode":"7ffb72d85af30ac7","toSide":"top"},
+		{"id":"6ece190b1f25af64","fromNode":"5e0af58fefe86ec0","fromSide":"bottom","toNode":"4d92202e7828f77e","toSide":"top"},
+		{"id":"a3f8eab71185fd22","fromNode":"7ffb72d85af30ac7","fromSide":"bottom","toNode":"bd8ed2c2af55fad6","toSide":"top"},
+		{"id":"98c137ad9444d969","fromNode":"bd8ed2c2af55fad6","fromSide":"bottom","toNode":"29a12ee702893d52","toSide":"top"},
+		{"id":"26c65e5234b6a954","fromNode":"29a12ee702893d52","fromSide":"bottom","toNode":"c7d386b3732def6c","toSide":"top"},
+		{"id":"a161983603548fd5","fromNode":"c7d386b3732def6c","fromSide":"bottom","toNode":"2613967e2e21c2b3","toSide":"top"},
+		{"id":"dfffd34bda5d7e8f","fromNode":"4d92202e7828f77e","fromSide":"bottom","toNode":"39f3115023273076","toSide":"top"},
+		{"id":"b0a09d1723ce9218","fromNode":"39f3115023273076","fromSide":"bottom","toNode":"29a12ee702893d52","toSide":"left"},
+		{"id":"8a4bfc36a524244e","fromNode":"39f3115023273076","fromSide":"bottom","toNode":"c7d386b3732def6c","toSide":"left"},
+		{"id":"8249e176a8b42a2c","fromNode":"39f3115023273076","fromSide":"bottom","toNode":"2613967e2e21c2b3","toSide":"left"},
+		{"id":"2471f76d72d25f9b","fromNode":"5e0af58fefe86ec0","fromSide":"right","toNode":"8993c758f1a67a39","toSide":"left"},
+		{"id":"97ff65a922fe9194","fromNode":"2613967e2e21c2b3","fromSide":"bottom","toNode":"3086a058e25045d7","toSide":"top"}
+	]
+}
