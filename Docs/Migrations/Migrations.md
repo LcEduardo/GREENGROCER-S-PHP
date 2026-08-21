@@ -223,18 +223,11 @@ O banco não tem como preencher esse valor sozinho nas linhas antigas, então a 
 Isso é o que costuma ser chamado de **"data migration"** — quando a mudança mexe tanto na estrutura quanto nos dados que já existem, não só na carcaça.
 
 ---
-## Ver também
-
-- [[Doctrine Project]] — o que é o ecossistema Doctrine (DBAL vs ORM vs Migrations) e DBAL vs PDO.
-- [[Composer]] — autoload PSR-4, sem o qual o Doctrine não acha as classes das migrations.
-- Caso real de uso completo: projeto **Greengrocer's**, dentro desta mesma pasta (`Greengrocer's/MOC`).
-
----
 ## 🔮 Próximos passos (o que ainda não sei)
 
 Coisas que ficaram de fora por enquanto — não porque não importam, mas porque ainda não bati de frente com elas. Quando aprender cada uma, volto aqui pra marcar e linkar a nota nova.
 
-- [ ] **CI/CD** — hoje eu rodo as migrations na mão. Não sei ainda como funciona um pipeline de deploy, mas quando aprender, dá pra integrar: o pipeline roda `migrations:migrate` sozinho antes (ou depois) de subir a versão nova do sistema.
+- [ ] **CI/CD** — integrar o pipeline para rodar `migrations:migrate` sozinho antes (ou depois) de subir a versão nova do sistema.
 - [ ] **`migrations:diff`** — o Doctrine consegue comparar o schema do banco com as entidades e gerar a migration sozinho. Só serve se eu adotar o Doctrine ORM (hoje uso só o DBAL, standalone). -- Alura tem uma aula sobre::[Doctrine: Migrations, relatórios e performance](https://cursos.alura.com.br/course/doctrine-migrations-relatorios-performance)
 - [ ] **Migrations em equipe** — como resolver quando dois devs criam uma migration ao mesmo tempo (conflito de ordem/timestamp).
 - [ ] **Squash de migrations antigas** — comprimir um histórico grande numa migration só, pra acelerar o setup de um ambiente novo.
