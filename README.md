@@ -4,11 +4,6 @@
 - [ ] Implementar o padrão TDD (Test Driven Development) no projeto.
 - [ ] Implementar o padrão MVC (Model-View-Controller) no projeto.
 
-## Clean Code
-- Sem comentários longos
-- Sem duplicação de código
-- Nomes de variáveis e funções claros e descritivos
-
 ## Requisitos
 
 **Ambiente:**
