@@ -32,4 +32,26 @@ class View
         // Executa o layout, que injeta $content dentro do <body>
         require "{$this->templatesPath}/layout/default.php";
     }
+
+    /**
+     * Renderiza um template SEM o layout e DEVOLVE o HTML em vez de imprimir.
+     *
+     * É o que permite um pedaço de tela ter uma origem só. A lista de
+     * movimentações de estoque chega por dois caminhos — o primeiro paint, que
+     * vem dentro da página inteira, e cada rolagem seguinte, que volta por
+     * fetch — e os dois passam por aqui. Sem isso, as linhas da tabela seriam
+     * escritas duas vezes: uma em PHP e outra em JavaScript, para se
+     * desencontrarem no primeiro campo novo.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function partial(string $template, array $data = []): string
+    {
+        extract($data);
+
+        ob_start();
+        require "{$this->templatesPath}/{$template}.php";
+
+        return ob_get_clean();
+    }
 }

@@ -34,8 +34,8 @@ $limiteEstoqueBaixo = 3.0;
     <!-- ===== FILTROS ===== -->
     <div class="gg-toolbar">
         <nav class="gg-chips" aria-label="Filtrar por categoria">
-            <?php $sufixoBusca = $busca !== null ? '&q=' . urlencode($busca) : ''; ?>
-            <a class="gg-chip" href="/<?= $busca !== null ? '?q=' . urlencode($busca) : '' ?>"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>
+            <?php $sufixoBusca = $searchProduct !== null ? '&q=' . urlencode($searchProduct) : ''; ?>
+            <a class="gg-chip" href="/<?= $searchProduct !== null ? '?q=' . urlencode($searchProduct) : '' ?>"<?= $categoriaSelecionada === null ? ' aria-current="page"' : '' ?>>Todos</a>
             <?php foreach ($categorias as $id => $nome): ?>
                 <a class="gg-chip" href="/?category=<?= $id . $sufixoBusca ?>"<?= $categoriaSelecionada === $id ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($nome) ?></a>
             <?php endforeach; ?>

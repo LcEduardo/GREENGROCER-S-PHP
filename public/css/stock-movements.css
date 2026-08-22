@@ -1,0 +1,249 @@
+/* Movimentações de estoque — o livro de auditoria.
+
+   Primeira tela do projeto em formato de TABELA, e não de cartões. É uma
+   escolha do conteúdo: as outras telas do admin listam coisas que se abrem uma
+   a uma (produto, pedido), enquanto esta existe para ser VARRIDA de cima a
+   baixo — "quando entrou tomate?", "quem forneceu?". Colunas alinhadas fazem
+   isso; cartão nenhum faz.
+
+   Nada de paleta nova: os mesmos tokens do :root de style.css, o mesmo cartão
+   branco de admin.css e os mesmos campos de forms.css. Depende dos dois no
+   <head>, que precisam vir antes deste <link>. */
+
+
+/* ===== BUSCA ===== */
+
+.gg-mov-search {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+/* O campo cresce e os botões ficam do tamanho do texto — mas com um teto, para
+   que a busca não vire uma faixa de 1200px numa tela larga. */
+.gg-mov-search__field {
+    flex: 1;
+    min-width: 200px;
+    max-width: 380px;
+}
+
+
+/* ===== CONTAGEM ===== */
+
+.gg-mov-count {
+    margin-bottom: 12px;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: #8a7a55;
+}
+
+.gg-mov-count strong {
+    font-family: var(--gg-font-display);
+    font-size: 15px;
+    color: var(--gg-green-700);
+}
+
+
+/* ===== TABELA ===== */
+
+/* O cartão branco de admin.css, mas envolvendo a tabela inteira em vez de cada
+   linha: numa lista para varrer, um cartão por linha viraria 200 sombras
+   empilhadas e o olho perderia o alinhamento das colunas. */
+.gg-mov-table-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(80, 52, 20, .1);
+}
+
+.gg-mov-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* Abaixo disso as colunas começam a se espremer; a barra de rolagem
+       horizontal do .gg-mov-table-wrap assume a partir daí. */
+    min-width: 780px;
+}
+
+.gg-mov-table thead th {
+    padding: 12px 16px;
+    border-bottom: 1px solid #efe3c6;
+    background: var(--gg-cream-light);
+    text-align: left;
+    white-space: nowrap;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+    color: #8a7a55;
+}
+
+.gg-mov-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #f4ebd6;
+    font-family: var(--gg-font-body);
+    font-size: 14px;
+    color: #3a2c14;
+    vertical-align: middle;
+}
+
+.gg-mov-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.gg-mov-table tbody tr:hover td {
+    background: #fdfaf1;
+}
+
+
+/* ===== CÉLULAS ===== */
+
+.gg-mov-row__date {
+    white-space: nowrap;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    color: #3a2c14;
+}
+
+/* Fornecedor em branco é o normal para venda e ajuste manual — não é dado
+   faltando. O tom mais claro diz "não se aplica" sem precisar de um "—". */
+.gg-mov-row__supplier {
+    color: #8a7a55;
+}
+
+.gg-mov-row__product {
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.gg-mov-row__historical {
+    max-width: 320px;
+    font-size: 13px;
+    color: #6b5c3c;
+}
+
+
+/* ===== QUANTIDADE ===== */
+
+/* Números tabulares: sem isso os dígitos têm larguras diferentes e a coluna
+   deixa de ser conferível de cima a baixo, que é o motivo de ela existir.
+   Sem cor de entrada/saída: sem a seta ao lado, verde e vermelho seriam a
+   ÚNICA pista da direção — e cor sozinha não é informação acessível. */
+.gg-mov-row__qty {
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-family: var(--gg-font-display);
+    font-weight: 600;
+    font-size: 15px;
+}
+
+
+/* ===== ETIQUETA DE ORIGEM ===== */
+
+/* Mesma pílula do .gg-admin-row__pill, com uma cor por origem — é o que
+   permite achar "todas as compras" varrendo a coluna com o olho. */
+.gg-mov-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 12px;
+    background: var(--gg-cream);
+    color: #8a7a55;
+}
+
+.gg-mov-tag--purchase {
+    background: #e4f3e2;
+    color: #2c6b32;
+}
+
+.gg-mov-tag--sale {
+    background: #fdece9;
+    color: #a5301f;
+}
+
+.gg-mov-tag--manual_adjustment {
+    background: #f0e6d2;
+    color: #8a7a55;
+}
+
+
+/* ===== RODAPÉ DE PAGINAÇÃO ===== */
+
+.gg-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.gg-pager__pages {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Os números e as setas são o mesmo botão, com tamanhos diferentes: o alvo
+   quadrado de 34px é o mínimo confortável para clique e para o dedo. */
+.gg-pager__page,
+.gg-pager__step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #e6d8b4;
+    border-radius: 10px;
+    background: #fff;
+    text-decoration: none;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: #6b5c3c;
+}
+
+.gg-pager__page:hover,
+.gg-pager__step:hover {
+    border-color: var(--gg-green-500);
+    background: var(--gg-cream-light);
+    color: var(--gg-green-700);
+}
+
+/* A página atual é <span>, não link — daí ela não tem :hover nem cursor de
+   mão: clicar nela recarregaria a mesma tela. */
+.gg-pager__page--current {
+    border-color: var(--gg-green-500);
+    background: var(--gg-green-500);
+    color: #fff;
+}
+
+/* "Anterior" na primeira página (e "Próxima" na última) continua ocupando o
+   lugar, apagado: o rodapé não pula de posição a cada página virada. */
+.gg-pager__step--off {
+    opacity: .45;
+    cursor: default;
+}
+
+.gg-pager__gap {
+    padding: 0 2px;
+    font-family: var(--gg-font-body);
+    font-weight: 700;
+    color: #b8a888;
+}
+
+@media (max-width: 620px) {
+    .gg-mov-search__field {
+        max-width: none;
+    }
+}

@@ -246,7 +246,7 @@ class PurchaseRepositoryTest extends DatabaseTestCase
             $this->assertSame('in', $movimentacao['type']);
             $this->assertSame('purchase', $movimentacao['reference_type']);
             $this->assertSame($id, (int) $movimentacao['reference_id']);
-            $this->assertSame('Entrada de produto pelo pedido ' . $id, $movimentacao['description']);
+            $this->assertSame('Entrada de produto pelo pedido ' . $id, $movimentacao['historical']);
         }
 
         $this->assertSame($tomateId, (int) $movimentacoes[0]['product_id']);

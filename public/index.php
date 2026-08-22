@@ -9,10 +9,12 @@ use User\Greengrocers\Controller\CartController;
 use User\Greengrocers\Controller\ProductsController;
 use User\Greengrocers\Controller\PurchasesController;
 use User\Greengrocers\Controller\SessionsController;
+use User\Greengrocers\Controller\StockMovementsController;
 use User\Greengrocers\Controller\UsersController;
 use User\Greengrocers\Repository\CartRepository;
 use User\Greengrocers\Repository\ProductRepository;
 use User\Greengrocers\Repository\PurchaseRepository;
+use User\Greengrocers\Repository\StockMovementRepository;
 use User\Greengrocers\Repository\SupplierRepository;
 use User\Greengrocers\Repository\UserRepository;
 use User\Greengrocers\Database\Connection;
@@ -128,6 +130,16 @@ switch ($path) {
         } else {
             $controller->edit();
         }
+        break;
+
+    case '/admin/stock-movements':
+        if (!Guard::isAdmin()) {
+            header('Location: ' . (Guard::isLoggedIn() ? '/' : '/login'));
+            break;
+        }
+
+        $repo = new StockMovementRepository(Connection::get());
+        (new StockMovementsController($repo))->index();
         break;
 
     case '/cart/add':

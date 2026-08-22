@@ -155,7 +155,7 @@ Livro-caixa de auditoria (`MOVIMENTACOES_ESTOQUE` no documento original) — tod
 | reference_type | VARCHAR(20), CHECK IN (`purchase`, `sale`, `manual_adjustment`) |
 | reference_id | INTEGER, opcional — id de `purchases` ou `sales`, conforme `reference_type`; nulo em ajuste manual |
 | moved_at | DATETIME_IMMUTABLE |
-| description | VARCHAR(255), opcional — a frase pronta da movimentação (ex.: `Entrada de produto pelo pedido 12`) |
+| historical | VARCHAR(255), opcional — a frase pronta da movimentação (ex.: `Entrada de produto pelo pedido 12`). Chamava-se `description` até a migration `Version20260821120000` |
 
 > ⚠️ `reference_id` é referência **polimórfica** (aponta para `purchases` ou `sales`) — sem FK física, pois banco relacional não impõe FK condicional. A integridade fica com a camada de aplicação.
 

@@ -37,6 +37,17 @@
     margin-bottom: 18px;
 }
 
+/* Mais de um botão no canto do cabeçalho. Um <div> em volta, e não os botões
+   soltos: o .gg-page__head separa TÍTULO de AÇÕES com space-between, e com três
+   filhos diretos ele espalharia os dois botões pela linha inteira em vez de
+   mantê-los juntos na ponta direita. */
+.gg-page__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .gg-page__title {
     font-family: var(--gg-font-display);
     font-weight: 600;

@@ -30,7 +30,7 @@ use User\Greengrocers\Model\PurchaseItem;
  */
 class PurchaseRepository
 {
-    /** A frase que fica no livro de movimentações. O `%d` é o id do pedido. */
+    /** A frase que fica no `historical` do livro de movimentações. O `%d` é o id do pedido. */
     private const DESCRICAO_ENTRADA = 'Entrada de produto pelo pedido %d';
 
     public function __construct(private readonly PDO $pdo)
@@ -279,8 +279,8 @@ class PurchaseRepository
         string $quando,
     ): void {
         $sql = 'INSERT INTO stock_movements'
-             . ' (product_id, type, quantity, reference_type, reference_id, moved_at, description)'
-             . " VALUES (:productId, 'in', :quantity, 'purchase', :referenceId, :movedAt, :description)";
+             . ' (product_id, type, quantity, reference_type, reference_id, moved_at, historical)'
+             . " VALUES (:productId, 'in', :quantity, 'purchase', :referenceId, :movedAt, :historical)";
 
         $statement = $this->pdo->prepare($sql);
         $statement->execute([
@@ -288,7 +288,7 @@ class PurchaseRepository
             'quantity'    => $item->quantity,
             'referenceId' => $purchaseId,
             'movedAt'     => $quando,
-            'description' => $descricao,
+            'historical'  => $descricao,
         ]);
     }
 

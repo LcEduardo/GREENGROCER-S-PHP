@@ -4,7 +4,6 @@
 - [ ] Implementar o padrão TDD (Test Driven Development) no projeto.
 - [ ] Implementar o padrão MVC (Model-View-Controller) no projeto.
 
-
 ## Requisitos
 
 **Ambiente:**
@@ -204,6 +203,7 @@ Explicações mais profundas — o código lido método a método, não só a de
 - [`purchases-controller.md`](Docs/Code-Review/purchases-controller.md) — o fluxo do pedido de compra: o problema N+1 da listagem (e como foi resolvido) e os métodos `create()`/`store()`/`edit()`/`update()`.
 - [`db-structure.md`](Docs/Code-Review/db-structure.md) — o schema do banco, tabela a tabela.
 - [`cart.md`](Docs/Code-Review/cart.md) — a implementação do carrinho de compras.
+- [`stock-movements.md`](Docs/Code-Review/stock-movements.md) — a tela do livro de movimentações de estoque: os joins da consulta, a paginação de 7 em 7 e a migration que renomeou `description` para `historical` (com o plano de rollback).
 
 ---
 
