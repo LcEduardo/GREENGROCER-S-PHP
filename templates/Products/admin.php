@@ -5,7 +5,14 @@
             <h1 class="gg-page__title"><?= htmlspecialchars($title) ?></h1>
             <p class="gg-page__sub">Todo o estoque, ativo e inativo. Só o que está ativo aparece na vitrine.</p>
         </div>
-        <a class="gg-btn gg-btn--primary" href="/admin/products/create">+ Novo produto</a>
+        <!-- Movimentações fica ao lado de "+ Novo produto" porque é sobre os
+             MESMOS produtos, vistos pelo outro lado: aqui o saldo de agora, lá
+             como ele chegou nesse número. Em ghost, e não em primary, para não
+             disputar com a ação principal da tela. -->
+        <div class="gg-page__actions">
+            <a class="gg-btn gg-btn--ghost" href="/admin/stock-movements">Movimentações</a>
+            <a class="gg-btn gg-btn--primary" href="/admin/products/create">+ Novo produto</a>
+        </div>
     </div>
 
     <?php if (empty($produtos)): ?>

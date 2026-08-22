@@ -38,6 +38,7 @@ if ($carrinhoLogado) {
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/admin.css">
     <link rel="stylesheet" href="/css/purchases.css">
+    <link rel="stylesheet" href="/css/stock-movements.css">
 </head>
 <body>
     <header class="gg-header">
@@ -52,7 +53,7 @@ if ($carrinhoLogado) {
                 <?php if (!empty($categoriaSelecionada)): ?>
                     <input type="hidden" name="category" value="<?= (int) $categoriaSelecionada ?>">
                 <?php endif; ?>
-                <input type="search" name="q" value="<?= htmlspecialchars($busca ?? '') ?>" placeholder="Buscar produto...">
+                <input type="search" name="q" value="<?= htmlspecialchars($searchProduct ?? '') ?>" placeholder="Buscar produto...">
                 <button type="submit">Buscar</button>
             </form>
 
